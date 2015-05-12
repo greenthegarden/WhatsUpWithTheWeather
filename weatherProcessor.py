@@ -7,7 +7,7 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('weatherPublisher.cfg')
+config = ConfigObj('weatherProcessor.cfg')
 
 print("{0}".format("Weather Processor"))
 
@@ -38,6 +38,62 @@ rainmm          = float(config['var_init']['rainmm'])
 
 #for key, value in config['var_init'].items() :
 #	print ("{0}: {1}".format(key, value))
+
+
+#---------------------------------------------------------------------------------------
+# Modules and details to support Twitter feed
+#
+#---------------------------------------------------------------------------------------
+
+
+twitter_report = {}
+
+def send_data_to_twitter() :
+
+	global twitter_report
+
+	twitter_str = TWITTER_PREFIX
+	cnt = 0
+
+	if len(twitter_report) > 1 :
+		for key, value in twitter_report.iteritems() :
+			twitter_str += key + ": " + value
+			cnt += 1
+			if cnt < len(twitter_report) :
+				twitter_str += ", "
+
+		assert len(twitter_str) < 140, "Twitter messages must be less than 140 characters!"
+
+		print("Twitter string: {0}".format(twitter_str))
+
+		try :
+			api.update_status(status=twitter_str)
+		except :
+			print "Twitter post error"
+
+	twitter_report = {}	# reset report
+
+def publish_twitter_string() :
+
+	global twitter_report
+
+	twitter_str = ""
+	cnt = 0
+
+	if len(twitter_report) > 1 :
+		for key, value in twitter_report.iteritems() :
+			twitter_str += key + ": " + value
+			cnt += 1
+			if cnt < len(twitter_report) :
+				twitter_str += ", "
+
+		assert len(twitter_str) < 140, "Twitter messages must be less than 140 characters!"
+
+		print("Twitter string: {0}".format(twitter_str))
+
+		client.publish("weather/twitter/report", str(twitter_str))
+
+	twitter_report = {}	# reset report
 
 
 #---------------------------------------------------------------------------------------
@@ -73,17 +129,19 @@ import json
 # http://wow.metoffice.gov.uk/automaticreading?siteid=123456&siteAuthenticationKey=654321&dateutc=2011-02-02+10%3A32%3A55&winddir=230&windspeedmph=12&windgustmph=12& windgustdir=25&humidity=90&dewptf=68.2&tempf=70&rainin=0&dailyrainin=5&baromin=29.1&soiltempf=25&soilmoisture=25&visibility=25&softwaretype=weathersoftware1.0
 
 # details for Bom WoW site
-BOM_WOW_URL             = config['bom_wow_cfg']['BOM_WOW_URL']
+# BOM_WOW_URL             = config['bom_wow_cfg']['BOM_WOW_URL']
 #SITE_ID                 = config['bom_wow_cfg']['SITE_ID']
 #SITE_AUTHENTICATION_KEY = config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY']	# 6 digit number
 
 # payload initialised with BoM WoW siteid and siteAuthenticationKey
-payload = {'siteid': config['bom_wow_cfg']['SITE_ID'],
-           'siteAuthenticationKey': config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY'],
-           }
+# payload = {'siteid': config['bom_wow_cfg']['SITE_ID'],
+#            'siteAuthenticationKey': config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY'],
+#            }
+#
+# print("Uploading to Site ID {0}".format(payload.get('siteid')))
+# print("Using Site Authentication Key {0}".format(payload.get('siteAuthenticationKey')))
 
-print("Uploading to Site ID {0}".format(payload.get('siteid')))
-print("Using Site Authentication Key {0}".format(payload.get('siteAuthenticationKey')))
+payload = {}
 
 def send_data_to_wow() :
 
@@ -362,7 +420,7 @@ def publish_weather() :
 
 		# ensure the report data is more up-to-date than previously sent message
 		# should prevent repots being sent if sensor is off
-		if ( msg_arrival_time_local > sentreportwithtime ) :
+		if ( msg_arrival_time_local > sent_report_with_time ) :
 
 #			send_data_to_wow()
 #			send_data_to_twitter()

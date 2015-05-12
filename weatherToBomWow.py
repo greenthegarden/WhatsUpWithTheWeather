@@ -23,7 +23,7 @@ import json
 # http://wow.metoffice.gov.uk/automaticreading?siteid=123456&siteAuthenticationKey=654321&dateutc=2011-02-02+10%3A32%3A55&winddir=230&windspeedmph=12&windgustmph=12& windgustdir=25&humidity=90&dewptf=68.2&tempf=70&rainin=0&dailyrainin=5&baromin=29.1&soiltempf=25&soilmoisture=25&visibility=25&softwaretype=weathersoftware1.0
 
 # details for Bom WoW site
-BOM_WOW_URL              = config['bom_wow_cfg']['BOM_WOW_URL']
+#BOM_WOW_URL              = config['bom_wow_cfg']['BOM_WOW_URL']
 #SITE_ID                 = config['bom_wow_cfg']['SITE_ID']
 #SITE_AUTHENTICATION_KEY = config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY']	# 6 digit number
 
@@ -38,6 +38,8 @@ payload = {'siteid': config['bom_wow_cfg']['SITE_ID'],
 #
 #---------------------------------------------------------------------------------------
 
+import ast
+
 import paho.mqtt.client as mqtt
 
 # The callback for when the client receives a CONNACK response from the server.
@@ -45,17 +47,22 @@ def on_connect(client, userdata, flags, rc) :
 
 	print("Connected with result code "+str(rc))
 
-	client.subscribe(config['BOM_WOW_REPORT_TOPIC'])
+	client.subscribe(config['REPORT_TOPIC'])
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg) :
 
-	if msg.topic == config['BOM_WOW_REPORT_TOPIC'] :
+	if msg.topic == config['REPORT_TOPIC'] :
 
 		print("topic message: {0}".format(msg.payload))
 
+		# convert the message payload back to a dict
+		payload.update(ast.literal_eval(msg.payload))
+
+		print("payload: {0}".format(payload))
+
 		# POST with form-encoded data1
-		#	r = requests.post(BOM_WOW_URL, data=payload)
+		#	r = requests.post(config['bom_wow_cfg']['BOM_WOW_URL'], data=payload)
 
 		# All requests will return a status code.
 		# A success is indicated by 200.

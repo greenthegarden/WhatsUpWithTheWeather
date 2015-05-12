@@ -5,7 +5,7 @@ config = ConfigObj()
 config.filename = 'weatherToBomWow.cfg'
 
 # BoM WoW report topic
-config['BOM_WOW_REPORT_TOPIC'] = "weather/bom_wow/report"
+config['REPORT_TOPIC'] = "weather/bom_wow/report"
 
 # BoM WoW configuration
 bom_wow_cfg = {

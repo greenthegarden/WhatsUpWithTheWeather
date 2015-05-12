@@ -48,16 +48,16 @@ def on_connect(client, userdata, flags, rc) :
 
 	print("Connected with result code "+str(rc))
 
-	client.subscribe(config['TWITTER_REPORT_TOPIC'])
+	client.subscribe(config['REPORT_TOPIC'])
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg) :
 
-	if msg.topic == config['TWITTER_REPORT_TOPIC'] :
+	if msg.topic == config['REPORT_TOPIC'] :
 
 		twitter_str = TWITTER_PREFIX + str(msg.payload)
 
-		assert len(twitter_str) < 140, "Twitter messages must be less than 140 characters!"
+		assert len(twitter_str) < 140, "Twitter messages must have a length less than 140 characters!"
 
 		print("Twitter string: {0}".format(twitter_str))
 

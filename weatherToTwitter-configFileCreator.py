@@ -4,8 +4,8 @@ from configobj import ConfigObj
 config = ConfigObj()
 config.filename = 'weatherToTwitter.cfg'
 
-# twitter report topic
-config['TWITTER_REPORT_TOPIC'] = "weather/bom_wow/report"
+# report topic
+config['REPORT_TOPIC'] = "weather/bom_wow/report"
 
 # twitter configuration
 twitter_cfg = {
