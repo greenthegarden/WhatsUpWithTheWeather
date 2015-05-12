@@ -2,7 +2,7 @@
 
 from configobj import ConfigObj
 config = ConfigObj()
-config.filename = 'weatherPublisher.cfg'
+config.filename = 'weatherProcessor.cfg'
 
 #
 config['REPORT_INTERVAL'] = 15
@@ -23,19 +23,14 @@ config['var_init'] = var_init
 
 # twitter configuration
 twitter_cfg = {
-	'CONSUMER_KEY'        : "Replace with consumer key!",
-	'CONSUMER_SECRET'     : "Replace with consumer secret!",
-	'ACCESS_TOKEN'        : "Replace with access token!",
-	'ACCESS_TOKEN_SECRET' : "Replace with access token secret!",
-	'TWITTER_PREFIX'      : "Weather @ Home => ",
+	'REPORT_TOPIC'       : "weather/twitter/report",
+	'MAX_MESSAGE_LENGTH' : 140,
 	}
 config['twitter_cfg'] = twitter_cfg
 
 # BoM WoW configuration
 bom_wow_cfg = {
-	'BOM_WOW_URL'             : 'http://wow.metoffice.gov.uk/automaticreading?',
-	'SITE_ID'                 : 'Replace with site id!',
-	'SITE_AUTHENTICATION_KEY' : 'Replace with site authentication key!',
+	'REPORT_TOPIC' : "weather/bom_wow/report",
 	}
 config['bom_wow_cfg'] = bom_wow_cfg
 

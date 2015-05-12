@@ -18,8 +18,9 @@ print("{0}".format("Weather Processor"))
 #---------------------------------------------------------------------------------------
 
 # interval (minutes) at which new reports are published
-REPORT_INTERVAL = config['REPORT_INTERVAL']
-assert REPORT_INTERVAL > 2, "REPORT_INTERVAL must be greater than interval between measurements: %r" % 5
+REPORT_INTERVAL      = int(config['REPORT_INTERVAL'])
+measurement_interval = int(config['measurement_interval'])
+assert REPORT_INTERVAL > measurement_interval, "REPORT_INTERVAL must be greater than interval between measurements: %r" % 5
 
 print("Reports published every {0} minutes".format(REPORT_INTERVAL))
 
@@ -45,33 +46,7 @@ rainmm          = float(config['var_init']['rainmm'])
 #
 #---------------------------------------------------------------------------------------
 
-
 twitter_report = {}
-
-def send_data_to_twitter() :
-
-	global twitter_report
-
-	twitter_str = TWITTER_PREFIX
-	cnt = 0
-
-	if len(twitter_report) > 1 :
-		for key, value in twitter_report.iteritems() :
-			twitter_str += key + ": " + value
-			cnt += 1
-			if cnt < len(twitter_report) :
-				twitter_str += ", "
-
-		assert len(twitter_str) < 140, "Twitter messages must be less than 140 characters!"
-
-		print("Twitter string: {0}".format(twitter_str))
-
-		try :
-			api.update_status(status=twitter_str)
-		except :
-			print "Twitter post error"
-
-	twitter_report = {}	# reset report
 
 def publish_twitter_string() :
 
@@ -87,11 +62,11 @@ def publish_twitter_string() :
 			if cnt < len(twitter_report) :
 				twitter_str += ", "
 
-		assert len(twitter_str) < 140, "Twitter messages must be less than 140 characters!"
+		assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
 
 		print("Twitter string: {0}".format(twitter_str))
 
-		client.publish("weather/twitter/report", str(twitter_str))
+		client.publish(config['twitter_cfg']['REPORT_TOPIC'], str(twitter_str))
 
 	twitter_report = {}	# reset report
 
@@ -128,47 +103,7 @@ import json
 
 # http://wow.metoffice.gov.uk/automaticreading?siteid=123456&siteAuthenticationKey=654321&dateutc=2011-02-02+10%3A32%3A55&winddir=230&windspeedmph=12&windgustmph=12& windgustdir=25&humidity=90&dewptf=68.2&tempf=70&rainin=0&dailyrainin=5&baromin=29.1&soiltempf=25&soilmoisture=25&visibility=25&softwaretype=weathersoftware1.0
 
-# details for Bom WoW site
-# BOM_WOW_URL             = config['bom_wow_cfg']['BOM_WOW_URL']
-#SITE_ID                 = config['bom_wow_cfg']['SITE_ID']
-#SITE_AUTHENTICATION_KEY = config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY']	# 6 digit number
-
-# payload initialised with BoM WoW siteid and siteAuthenticationKey
-# payload = {'siteid': config['bom_wow_cfg']['SITE_ID'],
-#            'siteAuthenticationKey': config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY'],
-#            }
-#
-# print("Uploading to Site ID {0}".format(payload.get('siteid')))
-# print("Using Site Authentication Key {0}".format(payload.get('siteAuthenticationKey')))
-
 payload = {}
-
-def send_data_to_wow() :
-
-	# add time to report
-	# The date must be in the following format: YYYY-mm-DD HH:mm:ss,
-	# where ':' is encoded as %3A, and the space is encoded as either '+' or %20.
-	# An example, valid date would be: 2011-02-29+10%3A32%3A55, for the 2nd of Feb, 2011 at 10:32:55.
-	# Note that the time is in 24 hour format.
-	# Also note that the date must be adjusted to UTC time - equivalent to the GMT time zone.
-	format = "%Y-%m-%d+%H:%M:%S"
-	datestr = msg_arrival_time_utc.strftime(format)
-	datestr = datestr.replace(':', '%3A')
-	payload['dateutc'] = datestr
-
-	# send report
-
-	print("payload local time: {0}".format(msg_arrival_time_local))
-	print("payload to be sent: {0}".format(payload))
-
-	# POST with form-encoded data1
-#	r = requests.post(BOM_WOW_URL, data=payload)
-
-	# All requests will return a status code.
-	# A success is indicated by 200.
-	# Anything else is a failure.
-	# A human readable error message will accompany all errors in JSON format.
-#	print("POST request status code: {0}".format(r.json))
 
 def publish_wow_data_string() :
 
@@ -188,7 +123,7 @@ def publish_wow_data_string() :
 	print("payload local time: {0}".format(msg_arrival_time_local))
 	print("payload to be sent: {0}".format(payload))
 
-	client.publish("weather/bom_wow/report", str(payload))
+	client.publish(config['bom_wow_cfg']['REPORT_TOPIC'], str(payload))
 
 
 #---------------------------------------------------------------------------------------

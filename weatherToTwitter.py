@@ -57,7 +57,7 @@ def on_message(client, userdata, msg) :
 
 		twitter_str = TWITTER_PREFIX + str(msg.payload)
 
-		assert len(twitter_str) < 140, "Twitter messages must have a length less than 140 characters!"
+		assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
 
 		print("Twitter string: {0}".format(twitter_str))
 
