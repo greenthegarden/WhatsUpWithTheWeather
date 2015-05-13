@@ -9,8 +9,6 @@
 from configobj import ConfigObj
 config = ConfigObj('weatherProcessor.cfg')
 
-print("{0}".format("Weather Processor"))
-
 
 #---------------------------------------------------------------------------------------
 # Enable logging
@@ -266,7 +264,7 @@ def on_message(client, userdata, msg) :
 	global tempc_daily_max, tempc_daily_min, rainfall_local_9am
 	global rainmm, dailyrainmm
 
-	print(msg.topic+" "+str(msg.payload))
+#	print(msg.topic+" "+str(msg.payload))
 
 	global twitter_report
 
