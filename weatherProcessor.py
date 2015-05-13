@@ -13,7 +13,7 @@ print("{0}".format("Weather Processor"))
 
 
 #---------------------------------------------------------------------------------------
-# Enable logging to
+# Enable logging
 #
 #---------------------------------------------------------------------------------------
 
@@ -22,12 +22,10 @@ print("{0}".format("Weather Processor"))
 
 import logging
 import logging.handlers
-#import argparse
 import sys
-#import time  # this is only being used as part of the example
 
 # Defaults
-LOG_FILENAME = "/tmp/weatherProcessor.log"
+LOG_FILENAME = config['log_cfg']['LOG_FILE']
 LOG_LEVEL = logging.INFO  # Could be e.g. "DEBUG" or "WARNING"
 
 # Configure logging to log to a file, making a new file at midnight and keeping the last 3 day's data

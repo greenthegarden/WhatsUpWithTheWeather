@@ -4,6 +4,13 @@ from configobj import ConfigObj
 config = ConfigObj()
 config.filename = 'weatherProcessor.cfg'
 
+
+# log configuration
+log_cfg = {
+	'LOG_FILE' : "/tmp/weatherProcessor.log",
+	}
+config['log_cfg'] = log_cfg
+
 #
 config['REPORT_INTERVAL'] = 15
 config['measurement_interval'] = 2

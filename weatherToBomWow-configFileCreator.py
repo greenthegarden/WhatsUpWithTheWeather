@@ -4,8 +4,15 @@ from configobj import ConfigObj
 config = ConfigObj()
 config.filename = 'weatherToBomWow.cfg'
 
+
 # BoM WoW report topic
 config['REPORT_TOPIC'] = "weather/bom_wow/report"
+
+# log configuration
+log_cfg = {
+	'LOG_FILE' : "/tmp/weatherToBomWow.log",
+	}
+config['log_cfg'] = log_cfg
 
 # BoM WoW configuration
 bom_wow_cfg = {

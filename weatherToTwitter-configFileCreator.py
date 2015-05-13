@@ -4,8 +4,15 @@ from configobj import ConfigObj
 config = ConfigObj()
 config.filename = 'weatherToTwitter.cfg'
 
+
 # report topic
 config['REPORT_TOPIC'] = "weather/bom_wow/report"
+
+# log configuration
+log_cfg = {
+	'LOG_FILE' : "/tmp/weatherToTwitter.log",
+	}
+config['log_cfg'] = log_cfg
 
 # twitter configuration
 twitter_cfg = {
