@@ -9,8 +9,6 @@
 from configobj import ConfigObj
 config = ConfigObj('weatherToTwitter.cfg')
 
-print("{0}".format("Weather to Twitter Publisher"))
-
 
 #---------------------------------------------------------------------------------------
 # Enable logging

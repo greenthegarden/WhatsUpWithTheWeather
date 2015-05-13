@@ -9,8 +9,6 @@
 from configobj import ConfigObj
 config = ConfigObj('weatherToBomWow.cfg')
 
-print("{0}".format("Weather to BoM WoW Publisher"))
-
 
 #---------------------------------------------------------------------------------------
 # Enable logging
