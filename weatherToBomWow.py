@@ -69,11 +69,6 @@ import json
 
 # http://wow.metoffice.gov.uk/automaticreading?siteid=123456&siteAuthenticationKey=654321&dateutc=2011-02-02+10%3A32%3A55&winddir=230&windspeedmph=12&windgustmph=12& windgustdir=25&humidity=90&dewptf=68.2&tempf=70&rainin=0&dailyrainin=5&baromin=29.1&soiltempf=25&soilmoisture=25&visibility=25&softwaretype=weathersoftware1.0
 
-# details for Bom WoW site
-#BOM_WOW_URL              = config['bom_wow_cfg']['BOM_WOW_URL']
-#SITE_ID                 = config['bom_wow_cfg']['SITE_ID']
-#SITE_AUTHENTICATION_KEY = config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY']	# 6 digit number
-
 # payload initialised with BoM WoW siteid and siteAuthenticationKey
 payload = {'siteid': config['bom_wow_cfg']['SITE_ID'],
            'siteAuthenticationKey': config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY'],
@@ -101,21 +96,19 @@ def on_message(client, userdata, msg) :
 
 	if msg.topic == config['REPORT_TOPIC'] :
 
-		print("topic message: {0}".format(msg.payload))
-
 		# convert the message payload back to a dict
 		payload.update(ast.literal_eval(msg.payload))
 
 		print("payload: {0}".format(payload))
 
 		# POST with form-encoded data1
-		#	r = requests.post(config['bom_wow_cfg']['BOM_WOW_URL'], data=payload)
+		r = requests.post(config['bom_wow_cfg']['BOM_WOW_URL'], data=payload)
 
 		# All requests will return a status code.
 		# A success is indicated by 200.
 		# Anything else is a failure.
 		# A human readable error message will accompany all errors in JSON format.
-	#	print("POST request status code: {0}".format(r.json))
+		print("POST request status code: {0}".format(r.json))
 
 
 # Definition of MQTT client and connection to MQTT Broker
