@@ -14,8 +14,7 @@
 ### END INIT INFO
 
 # Change the next 3 lines to suit where you install your script and what you want to call it
-#DIR=/usr/local/bin/myservice
-DIR=/Users/family/Development/github-projects/MqttWiFlyWeatherBoard/python
+DIR=/home/pi/WhatsUpWithTheWeather
 DAEMON=$DIR/weatherToBomWow.py
 DAEMON_NAME=weatherToBomWow
 
