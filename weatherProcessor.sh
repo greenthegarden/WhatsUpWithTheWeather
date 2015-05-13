@@ -4,7 +4,7 @@
 # http://blog.scphillips.com/posts/2013/07/getting-a-python-script-to-run-in-the-background-as-a-service-on-boot/
 
 ### BEGIN INIT INFO
-# Provides:          weatherPublisher
+# Provides:          weatherProcessor
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
@@ -16,8 +16,8 @@
 # Change the next 3 lines to suit where you install your script and what you want to call it
 #DIR=/usr/local/bin/myservice
 DIR=/Users/family/Development/github-projects/MqttWiFlyWeatherBoard/python
-DAEMON=$DIR/weatherPublisher.py
-DAEMON_NAME=weatherPublisher
+DAEMON=$DIR/weatherProcessor.py
+DAEMON_NAME=weatherProcessor
 
 # Add any command line options for your daemon here
 DAEMON_OPTS=""
