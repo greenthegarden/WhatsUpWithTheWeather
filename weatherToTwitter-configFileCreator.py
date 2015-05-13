@@ -6,7 +6,7 @@ config.filename = 'weatherToTwitter.cfg'
 
 
 # report topic
-config['REPORT_TOPIC'] = "weather/bom_wow/report"
+config['REPORT_TOPIC'] = "weather/twitter/report"
 
 # log configuration
 log_cfg = {
