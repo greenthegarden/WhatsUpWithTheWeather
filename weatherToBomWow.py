@@ -7,7 +7,7 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('weatherToBomWow.cfg')
+config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherToBomWow.cfg')
 
 
 #---------------------------------------------------------------------------------------
