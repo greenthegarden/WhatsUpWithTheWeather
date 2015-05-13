@@ -1,7 +1,18 @@
 #!/bin/sh
 
-# Code from
+# The following code is taken directly from
 # http://blog.scphillips.com/posts/2013/07/getting-a-python-script-to-run-in-the-background-as-a-service-on-boot/
+# Thanks to Stephen Christopher Phillips for posting
+# To use the scripts follow the instructions at the above link, but essentially
+# 1. Copy the init script into /etc/init.d, using: sudo cp weatherProcessor.sh /etc/init.d
+# 2. Ensure the init script is executable, using: sudo chmod 755 /etc/init.d/weatherProcessor.sh
+# To start the python script use: sudo /etc/init.d/weatherProcessor.sh start
+# To check the status use: /etc/init.d/weatherProcessor.sh status
+# To stop the script use: sudo /etc/init.d/weatherProcessor.sh stop
+# To get the script to start at startup use: sudo update-rc.d weatherProcessor.sh defaults
+
+
+
 
 ### BEGIN INIT INFO
 # Provides:          weatherProcessor
