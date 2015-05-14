@@ -7,7 +7,7 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherProcessor.cfg')
+config = ConfigObj('weatherProcessor.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -84,6 +84,7 @@ rainmm9am       = float(config['var_init']['rainmm9am'])
 # global variables to keep track of hourly data
 rainmm          = float(config['var_init']['rainmm'])
 
+report = {}
 #for key, value in config['var_init'].items() :
 #	print ("{0}: {1}".format(key, value))
 
@@ -93,59 +94,32 @@ rainmm          = float(config['var_init']['rainmm'])
 #
 #---------------------------------------------------------------------------------------
 
-hourly_summary = {}
+# based on https://stackoverflow.com/questions/5352546/best-way-to-extract-subset-of-key-value-pairs-from-python-dictionary-object/5352649#5352649
+def publish_on_hour_summary() :
 
-def publish_hourly_summary() :
+	wanted_keys = ['Temperature', 'Humidity', 'Rain_last_hour', 'Rain_since_9am'] # The keys you want
 
-	global hourly_summary
+	summary = {x: report[x] for x in wanted_keys if x in report}
 
-	if len(hourly_summary) > 1 :
-		client.publish(config['summary_topics']['HOURLY'], str(hourly_summary))
-
-	hourly_summary = {}	# reset report
-
-daily_summary = {}
+	if len(summary) > 1 :
+		client.publish(config['summary_topics']['HOURLY'], str(summary))
 
 def publish_daily_summary() :
 
-	global daily_summary
+	wanted_keys = ['Temp_Max', 'Temp_Min', 'Rain_since_9am'] # The keys you want
 
-	if len(daily_summary) > 1 :
-		client.publish(config['summary_topics']['DAILY'], str(daily_summary))
+	summary = {x: report[x] for x in wanted_keys if x in report}
 
-	daily_summary = {}
+	print(summary)
 
-def publish_report_string() :
-
-	global twitter_report
-
-	twitter_str = ""
-	cnt = 0
-
-	if len(twitter_report) > 1 :
-		for key, value in twitter_report.iteritems() :
-			twitter_str += key + ": " + value
-			cnt += 1
-			if cnt < len(twitter_report) :
-				twitter_str += ", "
-
-		assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
-
-		print("Twitter string: {0}".format(twitter_str))
-
-		client.publish(config['twitter_cfg']['REPORT_TOPIC'], str(twitter_str))
-
-	twitter_report = {}	# reset report
-
+	if len(summary) > 1 :
+		client.publish(config['summary_topics']['DAILY'], str(summary))
 
 
 #---------------------------------------------------------------------------------------
 # Modules and details to support Bom WoW feed
 #
 #---------------------------------------------------------------------------------------
-
-import requests
-import json
 
 # sends a report to the BoM WOW in format
 
@@ -287,39 +261,37 @@ def on_message(client, userdata, msg) :
 
 #	print(msg.topic+" "+str(msg.payload))
 
-	global hourly_summary
-	global daily_summary
-
 	bom_wow_report = {}
 
   # temperature data
 	if msg.topic == config['mqtt_data_topics']['TEMPERATURE_TOPIC'] :
   	# in degrees Celcius
 		tempc_msg_arrival_time = msg_arrival_time_local
-		hourly_summary['Temperature'] = msg.payload	# add as string rather than float
+		report['Temperature'] = msg.payload	# add as string rather than float
    	# convert to degrees Fahrenheit for Bom WoW
 		tempc = float(msg.payload)
 		bom_wow_report['tempf'] = '{0:.1f}'.format(degCtoF(tempc))
 		payload.update(bom_wow_report)
 		if (tempc > tempc_daily_max) :
 			tempc_daily_max = tempc
-			daily_summary['Temp_Max'] = tempc_daily_max
+			report['Temp_Max'] = tempc_daily_max
 			client.publish("weather/temperature/daily_max", str(tempc_daily_max))
 			client.publish("weather/temperature/daily_max_time", str(msg_arrival_time_local))
 		if (tempc < tempc_daily_min) :
 			tempc_daily_min = tempc
-			daily_summary['Temp_Min'] = tempc_daily_min
+			report['Temp_Min'] = tempc_daily_min
 			client.publish("weather/temperature/daily_min", str(tempc_daily_min))
 			client.publish("weather/temperature/daily_min_time", str(msg_arrival_time_local))
 	if msg.topic == config['mqtt_data_topics']['HUMIDITY_TOPIC'] :
   	# as a percentage
-		hourly_summary['Humidity'] = msg.payload	# add as string rather than float
+		report['Humidity'] = msg.payload	# add as string rather than float
 		humidity = float(msg.payload)
 		bom_wow_report['humidity'] = str(humidity)
 		payload.update(bom_wow_report)
 		if ( msg_arrival_time_local - tempc_msg_arrival_time ) < datetime.timedelta(seconds=2) :
 			dewpoint = dewpoint_calc(float(bom_wow_report.get('tempc',tempc)), humidity)
 			dewpoint_str = '{0:.1f}'.format(dewpoint)
+			report['Dewpoint'] = dewpoint_str
 			client.publish("weather/dewpoint/SHT15_dewpoint", dewpoint_str)
 #			bom_wow_report['dewptf'] = dewpoint_str
 #			payload.update(bom_wow_report)
@@ -328,7 +300,7 @@ def on_message(client, userdata, msg) :
 	# if error code generated when taking reading
 	if msg.topic == config['mqtt_data_topics']['PRESSURE_TOPIC'] :
 		# in mbar
-		hourly_summary['Pressure'] = msg.payload
+		report['Pressure'] = msg.payload
 		# convert to inches for Bom WoW
 		# 1 millibar (or hectopascal/hPa), is equivalent to 0.02953 inches of mercury (Hg).
 		# source: http://weatherfaqs.org.uk/node/72
@@ -338,13 +310,13 @@ def on_message(client, userdata, msg) :
 	# (wind and rain) if error code generated by wind direction reading
 	if msg.topic == config['mqtt_data_topics']['WIND_DIR_TOPIC'] :
 		# in degrees
-		hourly_summary['Wind_Dir'] = wind_degrees_to_direction(msg.payload)
+		report['Wind_Dir'] = wind_degrees_to_direction(msg.payload)
 #		bom_wow_report['winddir'] = msg.payload
 #		payload.update(bom_wow_report)
 	if msg.topic == config['mqtt_data_topics']['WIND_SPEED_TOPIC'] :
   	# in knots
   	# convert to miles per hour
-		hourly_summary['Wind_Spd'] = msg.payload	# add as string rather than float
+		report['Wind_Spd'] = msg.payload	# add as string rather than float
 #		bom_wow_report['windspeedmph'] = '{0:.1f}'.format(float(msg.payload) * 1.15078)
 #		payload.update(bom_wow_report)
 	if msg.topic == config['mqtt_data_topics']['RAIN_TOPIC'] :
@@ -352,13 +324,12 @@ def on_message(client, userdata, msg) :
   	# convert to inches
   	# resets automatically on hour
 		rainmm += float(msg.payload)
-		hourly_report['Rain_last_hour'] = str(rainmm)
+		report['Rain_last_hour'] = str(rainmm)
 		bom_wow_report['rainin'] = (rainmm*nu.mm)/nu.inch
 		payload.update(bom_wow_report)
 		# rain_9 is the rain since 9am - value is reset at 9am
 		rainmm9am += float(msg.payload)
-		hourly_summary['Rain_since_9am'] = str(rainmm9am)
-		daily_summary['Rain_since_9am'] = str(rainmm9am)
+		report['Rain_since_9am'] = str(rainmm9am)
 		client.publish("weather/rainfall/since9am", str(rainmmdaily))
 		# need to zero at midnight (occurs in main loop - value here will have already been reset)
 		rainmmdaily += float(msg.payload)
@@ -366,11 +337,11 @@ def on_message(client, userdata, msg) :
 		payload.update(bom_wow_report)
 		client.publish("weather/rainfall/sincemidnight", str(rainmmdaily))
 	if msg.topic == config['mqtt_data_topics']['BATTERY_VOLTAGE_TOPIC'] :
-		hourly_summary['Battery_Voltage'] = msg.payload
+		report['Battery_Voltage'] = msg.payload
 	if msg.topic == config['mqtt_data_topics']['SOLAR_VOLTAGE_TOPIC'] :
-		hourly_summary['Solar_Voltage'] = msg.payload
+		report['Solar_Voltage'] = msg.payload
 	if msg.topic == config['mqtt_data_topics']['OUTPUT_VOLTAGE_TOPIC'] :
-		hourly_summary['Output_Voltage'] = msg.payload
+		report['Output_Voltage'] = msg.payload
 
 # Definition of MQTT client and connection to MQTT Broker
 
@@ -408,16 +379,16 @@ import time
 # define schedule callbacks
 
 def on_hour() :
+	publish_on_hour_summary()
 	print("data reset on hour")
 	global rainmm
 	rainmm = 0
-	publish_hourly_summary()
 
 def at_9am() :
+	publish_daily_summary()
 	print("data reset at 9:00")
 	global rainmm9am
 	rainmm9am = 0
-	publish_daily_summary()
 
 def at_midnight() :
 	print("data reset at midnight")
