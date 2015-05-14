@@ -7,7 +7,7 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherToTwitter.cfg')
+config = ConfigObj('weatherToTwitter.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -80,13 +80,15 @@ auth.set_access_token(config['twitter_cfg']['ACCESS_TOKEN'],
 # Creation of the actual interface, using authentication
 api = tweepy.API(auth)
 
-TWITTER_PREFIX = config['twitter_cfg']['TWITTER_PREFIX']
+#TWITTER_PREFIX = config['twitter_cfg']['TWITTER_PREFIX']
 
 
 #---------------------------------------------------------------------------------------
 # Modules and methods to support MQTT
 #
 #---------------------------------------------------------------------------------------
+
+import ast
 
 import paho.mqtt.client as mqtt
 
@@ -102,7 +104,18 @@ def on_message(client, userdata, msg) :
 
 	if msg.topic == config['REPORT_TOPIC'] :
 
-		twitter_str = TWITTER_PREFIX + str(msg.payload)
+		# convert the message payload back to a dict
+		report = ast.literal_eval(msg.payload)
+
+		twitter_str = config['twitter_cfg']['TWITTER_PREFIX']
+		cnt = 0
+
+		if len(report) > 1 :
+			for key, value in report.iteritems() :
+				twitter_str += key + ": " + value
+				cnt += 1
+				if cnt < len(report) :
+					twitter_str += ", "
 
 		assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
 

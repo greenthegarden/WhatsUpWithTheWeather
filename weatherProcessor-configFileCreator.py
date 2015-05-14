@@ -28,16 +28,17 @@ var_init = {
 	}
 config['var_init'] = var_init
 
-# twitter configuration
-twitter_cfg = {
-	'REPORT_TOPIC'       : "weather/twitter/report",
-	'MAX_MESSAGE_LENGTH' : 140,
+# summary report configuration
+summary_topics = {
+	'HOURLY' : "weather/summary/hourly",
+	'DAILY'  : "weather/summary/daily",
 	}
-config['twitter_cfg'] = twitter_cfg
+config['summary_topics'] = summary_topics
 
 # BoM WoW configuration
 bom_wow_cfg = {
-	'REPORT_TOPIC' : "weather/bom_wow/report",
+	'REPORT_TOPIC'    : "weather/bom_wow/report",
+	'REPORT_INTERVAL' : 15
 	}
 config['bom_wow_cfg'] = bom_wow_cfg
 
