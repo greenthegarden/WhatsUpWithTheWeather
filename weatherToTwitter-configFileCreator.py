@@ -6,7 +6,10 @@ config.filename = 'weatherToTwitter.cfg'
 
 
 # report topic
-config['REPORT_TOPIC'] = "weather/twitter/report"
+#config['REPORT_TOPIC'] = "weather/summary/hourly"
+
+config['REPORT_TOPICS'] = {}
+config['REPORT_TOPICS'] = ['weather/summary/hourly', 'weather/summary/daily']
 
 # log configuration
 log_cfg = {

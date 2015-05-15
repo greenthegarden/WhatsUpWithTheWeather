@@ -97,7 +97,9 @@ def on_connect(client, userdata, flags, rc) :
 
 	print("Connected with result code "+str(rc))
 
-	client.subscribe(config['REPORT_TOPIC'])
+	for topic in config['REPORT_TOPICS'] :
+		client.subscribe(topic)
+		print("Subscribed to topic {0}".format(topic))
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg) :
