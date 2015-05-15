@@ -7,7 +7,7 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('weatherToTwitter.cfg')
+config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherToTwitter.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -104,30 +104,29 @@ def on_connect(client, userdata, flags, rc) :
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg) :
 
-	if msg.topic == config['REPORT_TOPIC'] :
+#	if msg.topic == config['REPORT_TOPIC'] :
 
-		# convert the message payload back to a dict
-		report = ast.literal_eval(msg.payload)
+	# convert the message payload back to a dict
+	report = ast.literal_eval(msg.payload)
 
-		twitter_str = config['twitter_cfg']['TWITTER_PREFIX']
-		cnt = 0
+	twitter_str = config['twitter_cfg']['TWITTER_PREFIX']
+	cnt = 0
 
-		if len(report) > 1 :
-			for key, value in report.iteritems() :
-				twitter_str += key + ": " + value
-				cnt += 1
-				if cnt < len(report) :
-					twitter_str += ", "
+	if len(report) > 1 :
+		for key, value in report.iteritems() :
+			twitter_str += key + ": " + value
+			cnt += 1
+			if cnt < len(report) :
+				twitter_str += ", "
 
-		assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
+	assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
 
-		print("Twitter string: {0}".format(twitter_str))
+	print("Twitter string: {0}".format(twitter_str))
 
-		try :
-			api.update_status(status=twitter_str)
-		except :
-			print "Twitter post error"
-
+	try :
+		api.update_status(status=twitter_str)
+	except :
+		print "Twitter post error"
 
 # Definition of MQTT client and connection to MQTT Broker
 
