@@ -7,7 +7,7 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('weatherProcessor.cfg')
+config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherProcessor.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -102,6 +102,7 @@ def publish_on_hour_summary() :
 	summary = {x: report[x] for x in wanted_keys if x in report}
 
 	if len(summary) > 1 :
+		print("Summary: {0}".fomat(str(summary)))
 		client.publish(config['summary_topics']['HOURLY'], str(summary))
 
 def publish_daily_summary() :
@@ -110,9 +111,8 @@ def publish_daily_summary() :
 
 	summary = {x: report[x] for x in wanted_keys if x in report}
 
-	print(summary)
-
 	if len(summary) > 1 :
+		print("Summary: {0}".fomat(str(summary)))
 		client.publish(config['summary_topics']['DAILY'], str(summary))
 
 
