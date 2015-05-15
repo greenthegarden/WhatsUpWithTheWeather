@@ -97,7 +97,7 @@ report = {}
 # based on https://stackoverflow.com/questions/5352546/best-way-to-extract-subset-of-key-value-pairs-from-python-dictionary-object/5352649#5352649
 def publish_on_hour_summary() :
 
-	wanted_keys = ['Temperature', 'Humidity', 'Rain_last_hour', 'Rain_since_9am'] # The keys you want
+	wanted_keys = ['Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am'] # The keys you want
 
 	summary = {x: report[x] for x in wanted_keys if x in report}
 
