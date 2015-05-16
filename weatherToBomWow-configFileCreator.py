@@ -6,7 +6,7 @@ config.filename = 'weatherToBomWow.cfg'
 
 
 # BoM WoW report topic
-config['REPORT_TOPIC'] = "weather/bom_wow/report"
+config['REPORT_TOPIC'] = "weather/summary/bom_wow"
 
 # log configuration
 log_cfg = {
@@ -19,6 +19,7 @@ bom_wow_cfg = {
 	'BOM_WOW_URL'             : 'http://wow.metoffice.gov.uk/automaticreading?',
 	'SITE_ID'                 : 'Replace with site id!',
 	'SITE_AUTHENTICATION_KEY' : 'Replace with site authentication key!',
+	'POST_DATA'               : 'True',
 	}
 config['bom_wow_cfg'] = bom_wow_cfg
 

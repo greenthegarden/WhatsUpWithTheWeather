@@ -7,7 +7,8 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherToBomWow.cfg')
+#config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherToBomWow.cfg')
+config = ConfigObj('weatherToBomWow.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -74,7 +75,7 @@ def hectopascalToIn(pressure) :
 	return float(pressure) * 0.02953
 
 # km/h to mph
-def speed_kphTomph(speed) :
+def speed_knotsToMilePerHour(speed) :
 	return float(speed) * 1.15078
 
 # mm to inches
@@ -88,18 +89,16 @@ def length_mmToinch(distance) :
 #
 #---------------------------------------------------------------------------------------
 
-import ast
-import requests
-import json
-
-# http://wow.metoffice.gov.uk/automaticreading?siteid=123456&siteAuthenticationKey=654321&dateutc=2011-02-02+10%3A32%3A55&winddir=230&windspeedmph=12&windgustmph=12& windgustdir=25&humidity=90&dewptf=68.2&tempf=70&rainin=0&dailyrainin=5&baromin=29.1&soiltempf=25&soilmoisture=25&visibility=25&softwaretype=weathersoftware1.0
-
 # payload initialised with BoM WoW siteid and siteAuthenticationKey
 payload = {'siteid': config['bom_wow_cfg']['SITE_ID'],
            'siteAuthenticationKey': config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY'],
            }
 
+data_to_post = {}
+
 # sends a report to the BoM WOW in format
+
+# http://wow.metoffice.gov.uk/automaticreading?siteid=123456&siteAuthenticationKey=654321&dateutc=2011-02-02+10%3A32%3A55&winddir=230&windspeedmph=12&windgustmph=12& windgustdir=25&humidity=90&dewptf=68.2&tempf=70&rainin=0&dailyrainin=5&baromin=29.1&soiltempf=25&soilmoisture=25&visibility=25&softwaretype=weathersoftware1.0
 
 # Weather Data (from http://wow.metoffice.gov.uk/support/dataformats)
 
@@ -121,10 +120,7 @@ payload = {'siteid': config['bom_wow_cfg']['SITE_ID'],
 # soilmoisture  % Moisture                                                         0-100 %
 # visibility    Visibility                                                         Nautical Miles
 
-# http://wow.metoffice.gov.uk/automaticreading?siteid=123456&siteAuthenticationKey=654321&dateutc=2011-02-02+10%3A32%3A55&winddir=230&windspeedmph=12&windgustmph=12& windgustdir=25&humidity=90&dewptf=68.2&tempf=70&rainin=0&dailyrainin=5&baromin=29.1&soiltempf=25&soilmoisture=25&visibility=25&softwaretype=weathersoftware1.0
-
-payload = {}
-
+from datetime import datetime
 
 def format_time(date_str) :
 	# add time to report
@@ -133,37 +129,46 @@ def format_time(date_str) :
 	# An example, valid date would be: 2011-02-29+10%3A32%3A55, for the 2nd of Feb, 2011 at 10:32:55.
 	# Note that the time is in 24 hour format.
 	# Also note that the date must be adjusted to UTC time - equivalent to the GMT time zone.
+	# first convert string back to datetime
+	tmp = datetime.strptime(date_str, "%a %b %d %H:%M:%S %Y")
+	# reformat
 	format = "%Y-%m-%d+%H:%M:%S"
-	tmp = time_str.strftime(format)
-	tmp = datestr.replace(':', '%3A')
+	tmp = tmp.strftime(format)
 	return(tmp)
 
+import ast
 
 def process_payload(report) :
 
+	global data_to_post
 	data_to_post = {}
 
 	# convert the message payload back to a dict
-	ast.literal_eval(report)
+	try :
+		report_dict = ast.literal_eval(report)
+	except :
+		print("{0}".format("String not able to be converted to dict"))
+		return
 
-	for key, value in report :
-		if key == 'Time' :
+	for key, value in report_dict.items() :
+		print("key, value: {0}, {1}".format(key, value))
+		if key == 'Time_UTC' :
 			data_to_post['dateutc'] = format_time(value)
 		if key == 'Temperature' :
 			# convert from degree Celsius to Farhenhiet
-			data_to_post['tempf'] = degCtoF(value)
+			data_to_post['tempf'] = '{0:.1f}'.format(degCtoF(value))
 		if key == 'Humidity' :
 			data_to_post['humidity'] = value
 		if key == 'Dewpoint' :
-			# convert from degree Celsius to Farhenhiet
-			data_to_post['dewptf'] = degCtoF(value)
+			# convert from degree Celsius to Fahrenheit
+			data_to_post['dewptf'] = '{0:.1f}'.format(degCtoF(value))
 		if key == 'Pressure' :
 			# convert from hectopascal to inches
 			data_to_post['baromin'] = '{0:.1f}'.format(hectopascalToIn(value))
 		if key == 'Wind_Dir' :
 			data_to_post['winddir'] = value
 		if key == 'Wind_Spd' :
-			data_to_post['windspeedmph'] = '{0:.1f}'.format(speed_kphTomph(value))
+			data_to_post['windspeedmph'] = '{0:.1f}'.format(speed_knotsToMilePerHour(value))
 		if key == 'Rain_last_hour' :
 			data_to_post['rainin'] = '{0:.1f}'.format(length_mmToinch(value))
 		if key == 'Rain_since_midnight' :
@@ -173,14 +178,26 @@ def process_payload(report) :
 
 	print("payload: {0}".format(payload))
 
-	# POST with form-encoded data1
-	r = requests.post(config['bom_wow_cfg']['BOM_WOW_URL'], data=payload)
+import requests
+import json
 
-	# All requests will return a status code.
-	# A success is indicated by 200.
-	# Anything else is a failure.
-	# A human readable error message will accompany all errors in JSON format.
-	print("POST request status code: {0}".format(r.json))
+def post_payload() :
+
+	global data_to_post
+
+	# check there is data to be posted before posting
+	if len(data_to_post) > 1 :
+		# POST with form-encoded data1
+		r = requests.post(config['bom_wow_cfg']['BOM_WOW_URL'], data=payload)
+
+		# All requests will return a status code.
+		# A success is indicated by 200.
+		# Anything else is a failure.
+		# A human readable error message will accompany all errors in JSON format.
+		print("POST request status code: {0}".format(r.json))
+
+	# clear data that was posted once sent
+	data_to_post = {}
 
 
 #---------------------------------------------------------------------------------------
@@ -201,9 +218,9 @@ def on_connect(client, userdata, flags, rc) :
 def on_message(client, userdata, msg) :
 
 	if msg.topic == config['REPORT_TOPIC'] :
-
 		process_payload(msg.payload)
-
+		if config['bom_wow_cfg']['POST_DATA'] == 'True' :
+			post_payload()
 
 # Definition of MQTT client and connection to MQTT Broker
 

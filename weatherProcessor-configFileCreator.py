@@ -11,10 +11,6 @@ log_cfg = {
 	}
 config['log_cfg'] = log_cfg
 
-#
-config['REPORT_INTERVAL'] = 15
-config['measurement_interval'] = 2
-
 # global variable initialisation
 var_init = {
 	'tempc'           : -100,
@@ -30,29 +26,23 @@ config['var_init'] = var_init
 
 # summary report configuration
 summary_hourly = {
-	'DATA'  : ['Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am']
+	'DATA'  : ['Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am'],
 	'TOPIC' : "weather/summary/hourly",
 	}
 config['summary_hourly'] = summary_hourly
 
 summary_daily = {
-	'DATA'  : ['Temp_Max', 'Temp_Min', 'Rain_since_9am']
+	'DATA'  : ['Temp_Max', 'Temp_Min', 'Rain_since_9am'],
 	'TOPIC' : "weather/summary/daily",
 	}
 config['summary_daily'] = summary_daily
 
-summary_topics = {
-	'HOURLY' : "weather/summary/hourly",
-	'DAILY'  : "weather/summary/daily",
-	}
-config['summary_topics'] = summary_topics
-
 # BoM WoW configuration
 summary_bom_wow = {
-	'DATA'  : ['Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_midnight']
-#	'DATA'  : ['Time', 'Temperature', 'Humidity', 'Dewpoint', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am']
+	'DATA'  : ['Time_UTC', 'Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_midnight'],
+#	'DATA'  : ['Time', 'Temperature', 'Humidity', 'Dewpoint', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am'],
 	'TOPIC'    : "weather/summary/bom_wow",
-	'INTERVAL' : 15
+	'INTERVAL' : 15,
 	}
 config['summary_bom_wow'] = summary_bom_wow
 
