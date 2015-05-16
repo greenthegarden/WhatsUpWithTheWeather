@@ -22,13 +22,25 @@ var_init = {
 	'tempc_daily_min' : 100,
 	'rainmmdaily'     : 0,
 	'tempc_to9_max'   : -100,
-	'tempc_to9_min'   : -100,
+	'tempc_to9_min'   : 100,
 	'rainmm9am'       : 0,
 	'rainmm'          : 0,
 	}
 config['var_init'] = var_init
 
 # summary report configuration
+summary_hourly = {
+	'DATA'  : ['Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am']
+	'TOPIC' : "weather/summary/hourly",
+	}
+config['summary_hourly'] = summary_hourly
+
+summary_daily = {
+	'DATA'  : ['Temp_Max', 'Temp_Min', 'Rain_since_9am']
+	'TOPIC' : "weather/summary/daily",
+	}
+config['summary_daily'] = summary_daily
+
 summary_topics = {
 	'HOURLY' : "weather/summary/hourly",
 	'DAILY'  : "weather/summary/daily",
@@ -36,11 +48,13 @@ summary_topics = {
 config['summary_topics'] = summary_topics
 
 # BoM WoW configuration
-bom_wow_cfg = {
-	'REPORT_TOPIC'    : "weather/bom_wow/report",
-	'REPORT_INTERVAL' : 15
+summary_bom_wow = {
+	'DATA'  : ['Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_midnight']
+#	'DATA'  : ['Time', 'Temperature', 'Humidity', 'Dewpoint', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am']
+	'TOPIC'    : "weather/summary/bom_wow",
+	'INTERVAL' : 15
 	}
-config['bom_wow_cfg'] = bom_wow_cfg
+config['summary_bom_wow'] = summary_bom_wow
 
 # mqtt configuration
 mqtt_configuration = {

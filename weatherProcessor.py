@@ -7,7 +7,8 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherProcessor.cfg')
+#config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherProcessor.cfg')
+config = ConfigObj('weatherProcessor.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -97,23 +98,36 @@ report = {}
 # based on https://stackoverflow.com/questions/5352546/best-way-to-extract-subset-of-key-value-pairs-from-python-dictionary-object/5352649#5352649
 def publish_on_hour_summary() :
 
-	wanted_keys = ['Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am'] # The keys you want
-
-	summary = {x: report[x] for x in wanted_keys if x in report}
+#	wanted_keys = ['Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am'] # The keys you want
+#	wanted_keys = config['summary_hourly']['DATA']
+	summary = {x: report[x] for x in config['summary_hourly']['DATA'] if x in report}
 
 	if len(summary) > 1 :
 		print("Summary: {0}".fomat(str(summary)))
-		client.publish(config['summary_topics']['HOURLY'], str(summary))
+		#client.publish(config['summary_topics']['HOURLY'], str(summary))
+		client.publish(config['summary_hourly']['TOPIC'], str(summary))
 
 def publish_daily_summary() :
 
-	wanted_keys = ['Temp_Max', 'Temp_Min', 'Rain_since_9am'] # The keys you want
+#	wanted_keys = ['Temp_Max', 'Temp_Min', 'Rain_since_9am'] # The keys you want
+#	wanted_keys = config['summary_daily']['DATA']
 
-	summary = {x: report[x] for x in wanted_keys if x in report}
+	summary = {x: report[x] for x in config['summary_daily']['DATA'] if x in report}
 
 	if len(summary) > 1 :
 		print("Summary: {0}".fomat(str(summary)))
-		client.publish(config['summary_topics']['DAILY'], str(summary))
+		client.publish(config['summary_daily']['TOPIC'], str(summary))
+
+def publish_bom_wow_summary() :
+
+#	wanted_keys = ['Temp_Max', 'Temp_Min', 'Rain_since_9am'] # The keys you want
+#	wanted_keys = config['summary_bom_wow']['DATA']
+
+	summary = {x: report[x] for x in config['summary_bom_wow']['DATA'] if x in report}
+
+	if len(summary) > 1 :
+		print("Summary: {0}".fomat(str(summary)))
+		client.publish(config['summary_bom_wow']['TOPIC'], str(summary))
 
 
 #---------------------------------------------------------------------------------------
@@ -333,6 +347,7 @@ def on_message(client, userdata, msg) :
 		client.publish("weather/rainfall/since9am", str(rainmmdaily))
 		# need to zero at midnight (occurs in main loop - value here will have already been reset)
 		rainmmdaily += float(msg.payload)
+		report['Rain_since_midnight'] = rainmmdaily
 		bom_wow_report['dailyrainin'] = (rainmmdaily*nu.mm)/nu.inch
 		payload.update(bom_wow_report)
 		client.publish("weather/rainfall/sincemidnight", str(rainmmdaily))
@@ -406,13 +421,13 @@ def publish_weather() :
 #			send_data_to_wow()
 #			send_data_to_twitter()
 
-			publish_wow_data_string()
+			publish_bom_wow_summary()
 
 		sent_report_with_time = msg_arrival_time_local
 
 # define schedules
 
-schedule.every(int(config['bom_wow_cfg']['REPORT_INTERVAL'])).minutes.do(publish_weather)
+schedule.every(int(config['summary_bom_wow']['REPORT_INTERVAL'])).minutes.do(publish_weather)
 schedule.every().hour.at(':00').do(on_hour)
 schedule.every().day.at("9:00").do(at_9am)
 schedule.every().day.at("0:00").do(at_midnight)

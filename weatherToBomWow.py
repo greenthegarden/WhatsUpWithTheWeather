@@ -60,10 +60,35 @@ sys.stderr = MyLogger(logger, logging.ERROR)
 
 
 #---------------------------------------------------------------------------------------
+# Modules and methods for processing weather data
+#
+#---------------------------------------------------------------------------------------
+
+# conversion of degrees Celcius to degrees
+def degCtoF(temperature) :
+	return( float(temperature) * (9/5.0) + 32 )
+
+# 1 millibar (or hectopascal/hPa), is equivalent to 0.02953 inches of mercury (Hg).
+# source: http://weatherfaqs.org.uk/node/72
+def hectopascalToIn(pressure) :
+	return float(pressure) * 0.02953
+
+# km/h to mph
+def speed_kphTomph(speed) :
+	return float(speed) * 1.15078
+
+# mm to inches
+def length_mmToinch(distance) :
+#		report['Rain_last_hour'] = str(rainmm)
+#		bom_wow_report['rainin'] = (rainmm*nu.mm)/nu.inch
+	return float(distance) / 25.4
+
+#---------------------------------------------------------------------------------------
 # Modules and details to support Bom WoW feed
 #
 #---------------------------------------------------------------------------------------
 
+import ast
 import requests
 import json
 
@@ -74,13 +99,94 @@ payload = {'siteid': config['bom_wow_cfg']['SITE_ID'],
            'siteAuthenticationKey': config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY'],
            }
 
+# sends a report to the BoM WOW in format
+
+# Weather Data (from http://wow.metoffice.gov.uk/support/dataformats)
+
+# The following is a list of items of weather data that can be uploaded to WOW.
+# Provide each piece of information as a key/value pair, e.g. winddir=225.5 or tempf=32.2.
+# Note that values should not be quoted or escaped.
+# Key           Value                                                              Unit
+# winddir       Instantaneous Wind Direction                                       Degrees (0-360)
+# windspeedmph  Instantaneous Wind Speed                                           Miles per Hour
+# windgustdir   Current Wind Gust Direction (using software specific time period)  0-360 degrees
+# windgustmph   Current Wind Gust (using software specific time period)            Miles per Hour
+# humidity      Outdoor Humidity                                                   0-100 %
+# dewptf        Outdoor Dewpoint                                                   Fahrenheit
+# tempf         Outdoor Temperature                                                Fahrenheit
+# rainin        Accumulated rainfall in the past 60 minutes                        Inches
+# dailyrainin   Inches of rain so far today                                        Inches
+# baromin       Barometric Pressure (see note)                                     Inches
+# soiltempf     Soil Temperature                                                   Fahrenheit
+# soilmoisture  % Moisture                                                         0-100 %
+# visibility    Visibility                                                         Nautical Miles
+
+# http://wow.metoffice.gov.uk/automaticreading?siteid=123456&siteAuthenticationKey=654321&dateutc=2011-02-02+10%3A32%3A55&winddir=230&windspeedmph=12&windgustmph=12& windgustdir=25&humidity=90&dewptf=68.2&tempf=70&rainin=0&dailyrainin=5&baromin=29.1&soiltempf=25&soilmoisture=25&visibility=25&softwaretype=weathersoftware1.0
+
+payload = {}
+
+
+def format_time(date_str) :
+	# add time to report
+	# The date must be in the following format: YYYY-mm-DD HH:mm:ss,
+	# where ':' is encoded as %3A, and the space is encoded as either '+' or %20.
+	# An example, valid date would be: 2011-02-29+10%3A32%3A55, for the 2nd of Feb, 2011 at 10:32:55.
+	# Note that the time is in 24 hour format.
+	# Also note that the date must be adjusted to UTC time - equivalent to the GMT time zone.
+	format = "%Y-%m-%d+%H:%M:%S"
+	tmp = time_str.strftime(format)
+	tmp = datestr.replace(':', '%3A')
+	return(tmp)
+
+
+def process_payload(report) :
+
+	data_to_post = {}
+
+	# convert the message payload back to a dict
+	ast.literal_eval(report)
+
+	for key, value in report :
+		if key == 'Time' :
+			data_to_post['dateutc'] = format_time(value)
+		if key == 'Temperature' :
+			# convert from degree Celsius to Farhenhiet
+			data_to_post['tempf'] = degCtoF(value)
+		if key == 'Humidity' :
+			data_to_post['humidity'] = value
+		if key == 'Dewpoint' :
+			# convert from degree Celsius to Farhenhiet
+			data_to_post['dewptf'] = degCtoF(value)
+		if key == 'Pressure' :
+			# convert from hectopascal to inches
+			data_to_post['baromin'] = '{0:.1f}'.format(hectopascalToIn(value))
+		if key == 'Wind_Dir' :
+			data_to_post['winddir'] = value
+		if key == 'Wind_Spd' :
+			data_to_post['windspeedmph'] = '{0:.1f}'.format(speed_kphTomph(value))
+		if key == 'Rain_last_hour' :
+			data_to_post['rainin'] = '{0:.1f}'.format(length_mmToinch(value))
+		if key == 'Rain_since_midnight' :
+			data_to_post['dailyrainin'] = '{0:.1f}'.format(length_mmToinch(value))
+
+	payload.update(data_to_post)
+
+	print("payload: {0}".format(payload))
+
+	# POST with form-encoded data1
+	r = requests.post(config['bom_wow_cfg']['BOM_WOW_URL'], data=payload)
+
+	# All requests will return a status code.
+	# A success is indicated by 200.
+	# Anything else is a failure.
+	# A human readable error message will accompany all errors in JSON format.
+	print("POST request status code: {0}".format(r.json))
+
 
 #---------------------------------------------------------------------------------------
 # Modules and methods to support MQTT
 #
 #---------------------------------------------------------------------------------------
-
-import ast
 
 import paho.mqtt.client as mqtt
 
@@ -96,19 +202,7 @@ def on_message(client, userdata, msg) :
 
 	if msg.topic == config['REPORT_TOPIC'] :
 
-		# convert the message payload back to a dict
-		payload.update(ast.literal_eval(msg.payload))
-
-		print("payload: {0}".format(payload))
-
-		# POST with form-encoded data1
-		r = requests.post(config['bom_wow_cfg']['BOM_WOW_URL'], data=payload)
-
-		# All requests will return a status code.
-		# A success is indicated by 200.
-		# Anything else is a failure.
-		# A human readable error message will accompany all errors in JSON format.
-		print("POST request status code: {0}".format(r.json))
+		process_payload(msg.payload)
 
 
 # Definition of MQTT client and connection to MQTT Broker
