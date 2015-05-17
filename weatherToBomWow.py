@@ -151,7 +151,7 @@ def process_payload(report) :
 		return
 
 	for key, value in report_dict.items() :
-		print("key, value: {0}, {1}".format(key, value))
+#		print("key, value: {0}, {1}".format(key, value))
 		if key == 'Time_UTC' :
 			data_to_post['dateutc'] = format_time(value)
 		if key == 'Temperature' :
@@ -174,9 +174,18 @@ def process_payload(report) :
 		if key == 'Rain_since_midnight' :
 			data_to_post['dailyrainin'] = '{0:.1f}'.format(length_mmToinch(value))
 
-	payload.update(data_to_post)
+	# ensure time was set and one other field otherwise do not send data
+	if not 'dateutc' in data_to_post :
+		print "dateutc not set!!"
+		data_to_post = {}
+		return
+	if not (len(data_to_post) > 1) :
+		print "data_to_post does not contain any data to post!!"
+		data_to_post = {}
+	else :
+		payload.update(data_to_post)
+		print("payload: {0}".format(payload))
 
-	print("payload: {0}".format(payload))
 
 import requests
 import json
