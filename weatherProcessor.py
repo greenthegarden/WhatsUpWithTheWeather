@@ -7,8 +7,8 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-#config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherProcessor.cfg')
-config = ConfigObj('weatherProcessor.cfg')
+config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherProcessor.cfg')
+#config = ConfigObj('weatherProcessor.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -96,6 +96,9 @@ def degCtoF(tempc) :
 def dewpoint_calc(tempc, humidity) :
 	# calculate dewpoint based on temperature and humidity
 	from math import log
+	tempc    = float(tempc)
+	humidity = float(humidity)
+	from math import log
 	if (tempc > 0.0) :
 		Tn = 243.12
 		m = 17.62
@@ -182,9 +185,8 @@ def on_message(client, userdata, msg) :
 
 #	print(msg.topic+" "+str(msg.payload))
 
-  # temperature data
 	if msg.topic == config['mqtt_data_topics']['TEMPERATURE_TOPIC'] :
-  	# in degrees Celcius
+		# in degrees Celcius
 		tempc = float(msg.payload)
 		tempc_msg_arrival_time = msg_arrival_time_local
 		report['Temperature'] = msg.payload	# add as string rather than float
@@ -206,7 +208,7 @@ def on_message(client, userdata, msg) :
 			client.publish("weather/temperature/daily_min_time", str(msg_arrival_time_local))
 
 	if msg.topic == config['mqtt_data_topics']['HUMIDITY_TOPIC'] :
-  	# as a percentage
+		# as a percentage
 		report['Humidity'] = msg.payload	# add as string rather than float
 		if ( msg_arrival_time_local - tempc_msg_arrival_time ) < timedelta(seconds=2) :
 			dewpoint = dewpoint_calc(float(report.get('Temperature',tempc)), float(msg.payload))
@@ -228,12 +230,12 @@ def on_message(client, userdata, msg) :
 		report['Wind_Dir'] = wind_degrees_to_direction(msg.payload)
 
 	if msg.topic == config['mqtt_data_topics']['WIND_SPEED_TOPIC'] :
-  	# in knots
+		# in knots
 		report['Wind_Spd'] = msg.payload	# add as string rather than float
 
 	if msg.topic == config['mqtt_data_topics']['RAIN_TOPIC'] :
-  	# in millimetres
-  	# rainmm value is reset to 0 on hour
+		# in millimetres
+		# rainmm value is reset to 0 on hour
 		rainmm += float(msg.payload)
 		report['Rain_last_hour'] = str(rainmm)
 		# rainmm9am is the rain since 9am - value is reset to 0 at 9am
