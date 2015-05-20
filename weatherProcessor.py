@@ -7,8 +7,8 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherProcessor.cfg')
-#config = ConfigObj('weatherProcessor.cfg')
+#config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherProcessor.cfg')
+config = ConfigObj('weatherProcessor.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -140,8 +140,12 @@ def wind_degrees_to_direction(degrees) :
 	if degrees == 337.5 :
 		return "NNW"
 
-def reformat_time(time_str) :
+def reformat_datetime(time_str) :
 	format = "%a %b %d %H:%M:%S %Y"
+	return(time_str.strftime(format))
+
+def reformat_time(time_str) :
+	format = "%H:%M"
 	return(time_str.strftime(format))
 
 
@@ -184,16 +188,20 @@ def on_message(client, userdata, msg) :
 		tempc = float(msg.payload)
 		tempc_msg_arrival_time = msg_arrival_time_local
 		report['Temperature'] = msg.payload	# add as string rather than float
-		report['Time'] = reformat_time(tempc_msg_arrival_time)
-		report['Time_UTC'] = reformat_time(msg_arrival_time_utc)
+		report['Time'] = reformat_datetime(tempc_msg_arrival_time)
+		report['Time_UTC'] = reformat_datetime(msg_arrival_time_utc)
 		if (tempc > tempc_daily_max) :
 			tempc_daily_max = tempc
 			report['Temp_Max'] = tempc_daily_max
+			report['Temp_Max_Time'] = reformat_time(msg_arrival_time_utc)
+			report['Temp_Max_@_Time'] = '{0:.1f}'.format(tempc_daily_max) + " @ " + reformat_time(tempc_msg_arrival_time)
 			client.publish("weather/temperature/daily_max", str(tempc_daily_max))
 			client.publish("weather/temperature/daily_max_time", str(msg_arrival_time_local))
 		if (tempc < tempc_daily_min) :
 			tempc_daily_min = tempc
 			report['Temp_Min'] = tempc_daily_min
+			report['Temp_Min_Time'] = reformat_time(msg_arrival_time_utc)
+			report['Temp_Min_@_Time'] = '{0:.1f}'.format(tempc_daily_min) + " @ " + reformat_time(tempc_msg_arrival_time)
 			client.publish("weather/temperature/daily_min", str(tempc_daily_min))
 			client.publish("weather/temperature/daily_min_time", str(msg_arrival_time_local))
 

@@ -32,7 +32,7 @@ summary_hourly = {
 config['summary_hourly'] = summary_hourly
 
 summary_daily = {
-	'DATA'  : ['Temp_Max', 'Temp_Min', 'Rain_since_9am'],
+	'DATA'  : ['Temp_Max_@_Time', 'Temp_Min_@_Time', 'Rain_since_9am'],
 	'TOPIC' : "weather/summary/daily",
 	}
 config['summary_daily'] = summary_daily

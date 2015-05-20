@@ -8,6 +8,7 @@
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
 config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherToTwitter.cfg')
+#config = ConfigObj('weatherToTwitter.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -107,27 +108,34 @@ def on_message(client, userdata, msg) :
 #	if msg.topic == config['REPORT_TOPIC'] :
 
 	# convert the message payload back to a dict
-	report = ast.literal_eval(msg.payload)
-
-	twitter_str = config['twitter_cfg']['TWITTER_PREFIX']
-	cnt = 0
-
-	if len(report) > 1 :
-		for key, value in report.iteritems() :
-			twitter_str += key + ": " + str(value)
-			cnt += 1
-			if cnt < len(report) :
-				twitter_str += ", "
-	# just remove last character
-
-	assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
-
-	print("Twitter string: {0}".format(twitter_str))
-
 	try :
-		api.update_status(status=twitter_str)
+		report = ast.literal_eval(msg.payload)
+
+		twitter_str = config['twitter_cfg']['TWITTER_PREFIX']
+
+	#	if msg.topic == 'weather/summary/daily' :	# needs to be a config element
+		if msg.topic == config['REPORT_TOPICS'][1] :
+			twitter_str += config['twitter_cfg']['TWITTER_DAILY_TXT']
+
+		if len(report) > 1 :
+
+			for key, value in report.iteritems() :
+
+				twitter_str += key + ": " + str(value) + ","
+
+			twitter_str = twitter_str[:-1]	# remove last comma
+
+			assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
+
+			print("Twitter string: {0}".format(twitter_str))
+
+			try :
+				api.update_status(status=twitter_str)
+			except :
+				print "Twitter post error"
+
 	except :
-		print "Twitter post error"
+		print "Failed to convert msg.payload to dict"
 
 # Definition of MQTT client and connection to MQTT Broker
 

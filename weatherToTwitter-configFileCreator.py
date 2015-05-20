@@ -24,6 +24,7 @@ twitter_cfg = {
 	'ACCESS_TOKEN'        : "Replace with access token!",
 	'ACCESS_TOKEN_SECRET' : "Replace with access token secret!",
 	'TWITTER_PREFIX'      : "Weather @ Home => ",
+	'TWITTER_DAILY_TXT'   : "Daily Summary: ",
 	'MAX_MESSAGE_LENGTH'  : 140,
 	}
 config['twitter_cfg'] = twitter_cfg
