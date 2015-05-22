@@ -118,12 +118,9 @@ def on_message(client, userdata, msg) :
 			twitter_str += config['twitter_cfg']['TWITTER_DAILY_TXT']
 
 		if len(report) > 1 :
-
 			for key, value in report.iteritems() :
-
-				twitter_str += key + ": " + str(value) + ","
-
-			twitter_str = twitter_str[:-1]	# remove last comma
+				twitter_str += key + ": " + str(value) + ", "
+			twitter_str = twitter_str[:-2]	# remove last comma and space
 
 			assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
 
