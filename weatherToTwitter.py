@@ -105,7 +105,7 @@ def on_connect(client, userdata, flags, rc) :
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg) :
 
-#	if msg.topic == config['REPORT_TOPIC'] :
+	print("msg.payload: {0}".format(msg.payload))
 
 	# convert the message payload back to a dict
 	try :
