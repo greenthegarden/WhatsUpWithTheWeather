@@ -30,7 +30,7 @@ summary_power = {
 	'TOPIC'    : "weather/summary/power",
 	'INTERVAL' : 15,
 	}
-config['summary_hourly'] = summary_hourly
+config['summary_power'] = summary_power
 
 summary_hourly = {
 	'DATA'  : ['Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am'],
