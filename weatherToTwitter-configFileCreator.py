@@ -5,12 +5,10 @@ config = ConfigObj()
 config.filename = 'weatherToTwitter.cfg'
 
 
-# report topic
-#config['REPORT_TOPIC'] = "weather/summary/hourly"
-
+# topics to publish
 config['REPORT_TOPICS'] = {}
-config['REPORT_TOPICS'] = ['weather/summary/hourly', 'weather/summary/daily']
-config['PUBLISH'] = False	# set to False to test code with out actually publishing
+config['REPORT_TOPICS'] = ['weather/summary/hourly', 'weather/summary/daily', 'weather/summary/power']
+config['PUBLISH'] = True	# set to False to test code with out actually publishing
 
 # log configuration
 log_cfg = {

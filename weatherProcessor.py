@@ -344,6 +344,7 @@ def publish_power_summary() :
 	if msg_arrival_time_local > publish_power_last_sent :
 		summary = {x: report[x] for x in config['summary_power']['DATA'] if x in report}
 		if len(summary) > 1 :
+			print("Topic: {0}".format(str(config['summary_power']['TOPIC'])))
 			print("Summary: {0}".format(str(summary)))
 			client.publish(config['summary_power']['TOPIC'], str(summary))
 		publish_power_last_sent = msg_arrival_time_local
@@ -353,6 +354,7 @@ def publish_on_hour_summary() :
 	if msg_arrival_time_local > publish_on_hour_last_sent :
 		summary = {x: report[x] for x in config['summary_hourly']['DATA'] if x in report}
 		if len(summary) > 1 :
+			print("Topic: {0}".format(str(config['summary_hourly']['TOPIC'])))
 			print("Summary: {0}".format(str(summary)))
 			client.publish(config['summary_hourly']['TOPIC'], str(summary))
 		publish_on_hour_last_sent = msg_arrival_time_local
@@ -362,6 +364,7 @@ def publish_daily_summary() :
 	if msg_arrival_time_local > publish_daily_last_sent :
 		summary = {x: report[x] for x in config['summary_daily']['DATA'] if x in report}
 		if len(summary) > 1 :
+			print("Topic: {0}".format(str(config['summary_daily']['TOPIC'])))
 			print("Summary: {0}".format(str(summary)))
 			client.publish(config['summary_daily']['TOPIC'], str(summary))
 		publish_daily_last_sent = msg_arrival_time_local
@@ -371,6 +374,7 @@ def publish_bom_wow_summary() :
 	if msg_arrival_time_local > publish_bom_wow_last_sent :
 		summary = {x: report[x] for x in config['summary_bom_wow']['DATA'] if x in report}
 		if len(summary) > 1 :
+			print("Topic: {0}".format(str(config['summary_bom_wow']['TOPIC'])))
 			print("Summary: {0}".format(str(summary)))
 			client.publish(config['summary_bom_wow']['TOPIC'], str(summary))
 		publish_bom_wow_last_sent = msg_arrival_time_local

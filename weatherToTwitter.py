@@ -83,7 +83,6 @@ api = tweepy.API(auth)
 
 #TWITTER_PREFIX = config['twitter_cfg']['TWITTER_PREFIX']
 
-
 #---------------------------------------------------------------------------------------
 # Modules and methods to support MQTT
 #
@@ -126,7 +125,7 @@ def on_message(client, userdata, msg) :
 
 			print("Twitter string: {0}".format(twitter_str))
 
-			if config['twitter_cfg']['PUBLISH'] :
+			if config['twitter_cfg']['PUBLISH'] == 'True' :
 				try :
 					api.update_status(status=twitter_str)
 				except :
