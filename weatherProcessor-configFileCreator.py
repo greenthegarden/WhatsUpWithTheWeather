@@ -25,6 +25,13 @@ var_init = {
 config['var_init'] = var_init
 
 # summary report configuration
+summary_power = {
+	'DATA'     : ['Battery_Voltage', 'Solar_Voltage', 'Output_Voltage'],
+	'TOPIC'    : "weather/summary/power",
+	'INTERVAL' : 15,
+	}
+config['summary_hourly'] = summary_hourly
+
 summary_hourly = {
 	'DATA'  : ['Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am'],
 	'TOPIC' : "weather/summary/hourly",
@@ -39,7 +46,7 @@ config['summary_daily'] = summary_daily
 
 # BoM WoW configuration
 summary_bom_wow = {
-	'DATA'  : ['Time_UTC', 'Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_midnight'],
+	'DATA'     : ['Time_UTC', 'Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_midnight'],
 #	'DATA'  : ['Time', 'Temperature', 'Humidity', 'Dewpoint', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am'],
 	'TOPIC'    : "weather/summary/bom_wow",
 	'INTERVAL' : 15,

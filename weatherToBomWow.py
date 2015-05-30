@@ -7,8 +7,8 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherToBomWow.cfg')
-#config = ConfigObj('weatherToBomWow.cfg')
+#config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherToBomWow.cfg')
+config = ConfigObj('weatherToBomWow.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -122,6 +122,9 @@ data_to_post = {}
 
 from datetime import datetime
 
+def timestr_to_time(date_str) :
+	return(datetime.strptime(date_str, "%a %b %d %H:%M:%S %Y"))
+
 def format_time(date_str) :
 	# add time to report
 	# The date must be in the following format: YYYY-mm-DD HH:mm:ss,
@@ -130,11 +133,17 @@ def format_time(date_str) :
 	# Note that the time is in 24 hour format.
 	# Also note that the date must be adjusted to UTC time - equivalent to the GMT time zone.
 	# first convert string back to datetime
-	tmp = datetime.strptime(date_str, "%a %b %d %H:%M:%S %Y")
 	# reformat
 	format = "%Y-%m-%d+%H:%M:%S"
-	tmp = tmp.strftime(format)
-	return(tmp)
+	return(timestr_to_time(date_str).strftime(format))
+
+latest_time = datetime.utcnow()
+
+def get_latest_time(new_time) :
+	global latest_time
+	if new_time > latest_time :
+		latest_time = new_time
+	return(latest_time)
 
 import ast
 
@@ -151,28 +160,31 @@ def process_payload(report) :
 		return
 
 	for key, value in report_dict.items() :
-#		print("key, value: {0}, {1}".format(key, value))
-		if key == 'Time_UTC' :
-			data_to_post['dateutc'] = format_time(value)
+		print("key, value: {0}, {1}".format(key, value))
+#		if key == 'Time_UTC' :
+#			data_to_post['dateutc'] = format_time(value)
 		if key == 'Temperature' :
 			# convert from degree Celsius to Farhenhiet
-			data_to_post['tempf'] = '{0:.1f}'.format(degCtoF(value))
+			data_to_post['tempf'] = '{0:.1f}'.format(degCtoF(value.get('value')))
+			data_to_post['dateutc'] = format_time(get_latest_time(timestr_to_time(value.get('time_utc'))))
 		if key == 'Humidity' :
-			data_to_post['humidity'] = value
+			data_to_post['humidity'] = value.get('value')
+			data_to_post['dateutc'] = format_time(get_latest_time(timestr_to_time(value.get('time_utc'))))
 		if key == 'Dewpoint' :
 			# convert from degree Celsius to Fahrenheit
-			data_to_post['dewptf'] = '{0:.1f}'.format(degCtoF(value))
+			data_to_post['dewptf'] = '{0:.1f}'.format(degCtoF(value.get('value')))
 		if key == 'Pressure' :
 			# convert from hectopascal to inches
-			data_to_post['baromin'] = '{0:.1f}'.format(hectopascalToIn(value))
+			data_to_post['baromin'] = '{0:.1f}'.format(hectopascalToIn(value.get('value')))
+			data_to_post['dateutc'] = get_latest_time(timestr_to_time(value.get('time_utc')))
 		if key == 'Wind_Dir' :
 			data_to_post['winddir'] = value
 		if key == 'Wind_Spd' :
-			data_to_post['windspeedmph'] = '{0:.1f}'.format(speed_knotsToMilePerHour(value))
+			data_to_post['windspeedmph'] = '{0:.1f}'.format(speed_knotsToMilePerHour(value.get('value')))
 		if key == 'Rain_last_hour' :
-			data_to_post['rainin'] = '{0:.1f}'.format(length_mmToinch(value))
+			data_to_post['rainin'] = '{0:.1f}'.format(length_mmToinch(value.get('value')))
 		if key == 'Rain_since_midnight' :
-			data_to_post['dailyrainin'] = '{0:.1f}'.format(length_mmToinch(value))
+			data_to_post['dailyrainin'] = '{0:.1f}'.format(length_mmToinch(value.get('value')))
 
 	# ensure time was set and one other field otherwise do not send data
 	if not 'dateutc' in data_to_post :

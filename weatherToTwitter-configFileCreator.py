@@ -10,6 +10,7 @@ config.filename = 'weatherToTwitter.cfg'
 
 config['REPORT_TOPICS'] = {}
 config['REPORT_TOPICS'] = ['weather/summary/hourly', 'weather/summary/daily']
+config['PUBLISH'] = False	# set to False to test code with out actually publishing
 
 # log configuration
 log_cfg = {

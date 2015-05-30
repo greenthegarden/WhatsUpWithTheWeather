@@ -7,8 +7,8 @@
 
 # see https://wiki.python.org/moin/ConfigParserShootout
 from configobj import ConfigObj
-config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherToTwitter.cfg')
-#config = ConfigObj('weatherToTwitter.cfg')
+#config = ConfigObj('/home/pi/WhatsUpWithTheWeather/weatherToTwitter.cfg')
+config = ConfigObj('weatherToTwitter.cfg')
 
 
 #---------------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ def on_message(client, userdata, msg) :
 
 	# convert the message payload back to a dict
 	try :
-		report = ast.literal_eval(msg.payload)
+		report = ast.literal_eval(str(msg.payload))
 
 		twitter_str = config['twitter_cfg']['TWITTER_PREFIX']
 
@@ -119,17 +119,18 @@ def on_message(client, userdata, msg) :
 
 		if len(report) > 1 :
 			for key, value in report.iteritems() :
-				twitter_str += key + ": " + str(value) + ", "
+				twitter_str += key + ": " + str(value.get('value')) + ", "
 			twitter_str = twitter_str[:-2]	# remove last comma and space
 
 			assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
 
 			print("Twitter string: {0}".format(twitter_str))
 
-			try :
-				api.update_status(status=twitter_str)
-			except :
-				print "Twitter post error"
+			if config['twitter_cfg']['PUBLISH'] :
+				try :
+					api.update_status(status=twitter_str)
+				except :
+					print "Twitter post error"
 
 	except :
 		print "Failed to convert msg.payload to dict"
