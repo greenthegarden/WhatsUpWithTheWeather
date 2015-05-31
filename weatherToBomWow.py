@@ -135,7 +135,9 @@ def format_time(date_str) :
 	# first convert string back to datetime
 	# reformat
 	format = "%Y-%m-%d+%H:%M:%S"
-	return(timestr_to_time(date_str).strftime(format))
+	datestr = timestr_to_time(date_str).strftime(format)
+	datestr = datestr.replace(':', '%3A')
+	return(datestr)
 
 latest_time = datetime.utcnow()
 
