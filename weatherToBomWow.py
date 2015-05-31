@@ -96,7 +96,7 @@ payload = {'siteid'                : config['bom_wow_cfg']['SITE_ID'],
            }
 
 print("Publishing weather data to Weather Observations Website")
-print("siteid: {0} with authentication key: {1}".format(siteid, siteAuthenticationKey))
+print("siteid: {0} with authentication key: {1}".format(config['bom_wow_cfg']['SITE_ID'], config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY']))
 
 data_to_post = {}
 
