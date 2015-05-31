@@ -169,16 +169,16 @@ def process_payload(report) :
 #			data_to_post['dateutc'] = format_time(get_latest_time(timestr_to_time(value.get('time_utc'))))
 		if key == 'Humidity' :
 			data_to_post['humidity'] = value.get('value')
-			data_to_post['dateutc'] = format_time(get_latest_time(timestr_to_time(value.get('time_utc'))))
+#			data_to_post['dateutc'] = format_time(get_latest_time(timestr_to_time(value.get('time_utc'))))
 		if key == 'Dewpoint' :
 			# convert from degree Celsius to Fahrenheit
 			data_to_post['dewptf'] = '{0:.1f}'.format(degCtoF(value.get('value')))
 		if key == 'Pressure' :
 			# convert from hectopascal to inches
 			data_to_post['baromin'] = '{0:.1f}'.format(hectopascalToIn(value.get('value')))
-			data_to_post['dateutc'] = get_latest_time(timestr_to_time(value.get('time_utc')))
+#			data_to_post['dateutc'] = get_latest_time(timestr_to_time(value.get('time_utc')))
 		if key == 'Wind_Dir' :
-			data_to_post['winddir'] = value
+			data_to_post['winddir'] = value.get('value')
 		if key == 'Wind_Spd' :
 			data_to_post['windspeedmph'] = '{0:.1f}'.format(speed_knotsToMilePerHour(value.get('value')))
 		if key == 'Rain_last_hour' :

@@ -118,18 +118,18 @@ def on_message(client, userdata, msg) :
 
 		if len(report) > 1 :
 			for key, value in report.iteritems() :
-				twitter_str += key + ": " + str(value.get('value')) + ", "
+				twitter_str += key + ": " + str(value.get('value')) + " " + str(value.get('units',"")) + ", "
 			twitter_str = twitter_str[:-2]	# remove last comma and space
 
 			assert len(twitter_str) < int(config['twitter_cfg']['MAX_MESSAGE_LENGTH']), "Twitter messages must have a length less than 140 characters!"
 
 			print("Twitter string: {0}".format(twitter_str))
 
-			if config['twitter_cfg']['PUBLISH'] == 'True' :
-				try :
-					api.update_status(status=twitter_str)
-				except :
-					print "Twitter post error"
+#			if config['twitter_cfg']['PUBLISH'] == 'True' :
+			try :
+				api.update_status(status=twitter_str)
+			except :
+				print "Twitter post error"
 
 	except :
 		print "Failed to convert msg.payload to dict"

@@ -110,38 +110,41 @@ def dewpoint_calc(tempc, humidity) :
 	return dewpoint
 
 def wind_degrees_to_direction(degrees) :
-	if degrees == 0 :
+	degrees = float(degrees)
+	if degrees == 0.0 :
 		return "N"
-	if degrees == 22.5 :
+	elif degrees == 22.5 :
 		return "NNE"
-	if degrees == 45 :
+	elif degrees == 45.0 :
 		return "NE"
-	if degrees == 67.5 :
+	elif degrees == 67.5 :
 		return "ENE"
-	if degrees == 90 :
+	elif degrees == 90.0 :
 		return "E"
-	if degrees == 112.5 :
+	elif degrees == 112.5 :
 		return "ESE"
-	if degrees == 135 :
+	elif degrees == 135.0 :
 		return "SE"
-	if degrees == 157.5 :
+	elif degrees == 157.5 :
 		return "SSE"
-	if degrees == 180 :
+	elif degrees == 180.0 :
 		return "S"
-	if degrees == 202.5 :
+	elif degrees == 202.5 :
 		return "SSW"
-	if degrees == 225 :
+	elif degrees == 225.0 :
 		return "SW"
-	if degrees == 247.5 :
+	elif degrees == 247.5 :
 		return "WSW"
-	if degrees == 270 :
+	elif degrees == 270.0 :
 		return "W"
-	if degrees == 292.5 :
+	elif degrees == 292.5 :
 		return "WNW"
-	if degrees == 315 :
+	elif degrees == 315.0 :
 		return "NW"
-	if degrees == 337.5 :
+	elif degrees == 337.5 :
 		return "NNW"
+	else :
+		return "ERROR"
 
 def reformat_datetime(time_str) :
 	format = "%a %b %d %H:%M:%S %Y"
@@ -192,6 +195,7 @@ def on_message(client, userdata, msg) :
 		report['Temperature'] = {'value'     : str(msg.payload),  # add as string rather than float
 														 'time_local': reformat_datetime(msg_arrival_time_local),
 														 'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+														 'units'     : 'oC',
 														 }
 		report['Time'] = reformat_datetime(tempc_msg_arrival_time)
 		report['Time_UTC'] = reformat_datetime(msg_arrival_time_utc)
@@ -200,6 +204,7 @@ def on_message(client, userdata, msg) :
 			report['Temperature_Max_to9am'] = {'value'     : '{0:.1f}'.format(tempc_daily_max),
 					  														 'time_local': reformat_datetime(msg_arrival_time_local),
 																				 'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+																				 'units'     : 'oC',
 																				 }
 			report['Temp_Max'] = '{0:.1f}'.format(tempc_daily_max)
 			report['Temp_Max_Time'] = reformat_time(msg_arrival_time_utc)
@@ -211,6 +216,7 @@ def on_message(client, userdata, msg) :
 			report['Temperature_Min_to9am'] = {'value'     : '{0:.1f}'.format(tempc_daily_max),
 					  														 'time_local': reformat_datetime(msg_arrival_time_local),
 																				 'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+																				 'units'     : 'oC',
 																				 }
 			report['Temp_Min'] = '{0:.1f}'.format(tempc_daily_max)
 			report['Temp_Min_Time'] = reformat_time(msg_arrival_time_utc)
@@ -223,6 +229,7 @@ def on_message(client, userdata, msg) :
 		report['Humidity'] = {'value'     : msg.payload,	# add as string rather than float
 					  							'time_local': reformat_datetime(msg_arrival_time_local),
 													'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													'units'     : '%',
 													}
 		# check temperature is in report
 		if (msg_arrival_time_local - datetime.strptime(report['Temperature'].get('time_local'), "%a %b %d %H:%M:%S %Y")) < timedelta(seconds=2) :
@@ -230,6 +237,7 @@ def on_message(client, userdata, msg) :
 			report['Dewpoint'] = {'value'     : '{0:.1f}'.format(dewpoint),
 						  							'time_local': reformat_datetime(msg_arrival_time_local),
 														'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+														'units'     : 'oC',
 														}
 			client.publish("weather/dewpoint/SHT15_dewpoint", '{0:.1f}'.format(dewpoint))
 
@@ -241,6 +249,7 @@ def on_message(client, userdata, msg) :
 		report['Pressure'] = {'value'     : msg.payload,
 						  						'time_local': reformat_datetime(msg_arrival_time_local),
 													'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													'units'     : 'mbar',
 													}
 
 	# weather station will not report measurements from the weather sensors
@@ -248,9 +257,10 @@ def on_message(client, userdata, msg) :
 	if msg.topic == config['mqtt_data_topics']['WIND_DIR_TOPIC'] :
 		# in degrees
 		report['Wind_Dir'] = {'value'     : msg.payload,
-													'direction' : wind_degrees_to_direction(msg.payload),
 						  						'time_local': reformat_datetime(msg_arrival_time_local),
 													'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													'units'     : 'deg',
+													'direction' : wind_degrees_to_direction(msg.payload),
 													}
 
 	if msg.topic == config['mqtt_data_topics']['WIND_SPEED_TOPIC'] :
@@ -258,6 +268,7 @@ def on_message(client, userdata, msg) :
 		report['Wind_Spd'] = {'value'     : msg.payload,
 						  						'time_local': reformat_datetime(msg_arrival_time_local),
 													'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													'units'     : 'knots',
 													}
 
 	if msg.topic == config['mqtt_data_topics']['RAIN_TOPIC'] :
@@ -269,12 +280,14 @@ def on_message(client, userdata, msg) :
 			report['Rain_last_hour'] = {'value'     : '{0:.1f}'.format(rainmm),
 						  						        'time_local': reformat_datetime(msg_arrival_time_local),
 													        'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													        'units'     : 'mm',
 													        }
 			# rainmm9am is the rain since 9am - value is reset to 0 at 9am
 			rainmm9am += float(msg.payload)
 			report['Rain_since_9am'] = {'value'     : '{0:.1f}'.format(rainmm9am),
 						  						        'time_local': reformat_datetime(msg_arrival_time_local),
 													        'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													        'units'     : 'mm',
 													        }
 			client.publish("weather/rainfall/since9am", '{0:.1f}'.format(rainmmdaily))
 			# rainmmdaily is the rain since midnight - value is reset to 0 at midnight
@@ -282,6 +295,7 @@ def on_message(client, userdata, msg) :
 			report['Rain_since_midnight'] = {'value'     : '{0:.1f}'.format(rainmmdaily),
 						  						             'time_local': reformat_datetime(msg_arrival_time_local),
 													             'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													             'units'     : 'mm',
 													             }
 			client.publish("weather/rainfall/sincemidnight", '{0:.1f}'.format(rainmmdaily))
 
@@ -289,18 +303,21 @@ def on_message(client, userdata, msg) :
 		report['Battery_Voltage'] = {'value'     : msg.payload,
 						  						       'time_local': reformat_datetime(msg_arrival_time_local),
 													       'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													       'units'     : 'volts',
 													        }
 
 	if msg.topic == config['mqtt_data_topics']['SOLAR_VOLTAGE_TOPIC'] :
 		report['Solar_Voltage'] = {'value'     : msg.payload,
 						  						     'time_local': reformat_datetime(msg_arrival_time_local),
 													     'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													     'units'     : 'volts',
 													      }
 
 	if msg.topic == config['mqtt_data_topics']['OUTPUT_VOLTAGE_TOPIC'] :
 		report['Output_Voltage'] = {'value'     : msg.payload,
 						  						      'time_local': reformat_datetime(msg_arrival_time_local),
 													      'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													      'units'     : 'volts',
 													      }
 
 # Definition of MQTT client and connection to MQTT Broker
