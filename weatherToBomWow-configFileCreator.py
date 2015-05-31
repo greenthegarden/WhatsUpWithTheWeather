@@ -17,6 +17,7 @@ config['log_cfg'] = log_cfg
 # BoM WoW configuration
 bom_wow_cfg = {
 	'BOM_WOW_URL'             : 'http://wow.metoffice.gov.uk/automaticreading?',
+	'SOFTWARE_TYPE'           : 'Python'
 	'SITE_ID'                 : 'Replace with site id!',
 	'SITE_AUTHENTICATION_KEY' : 'Replace with site authentication key!',
 	'POST_DATA'               : 'True',

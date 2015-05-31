@@ -90,8 +90,9 @@ def length_mmToinch(distance) :
 #---------------------------------------------------------------------------------------
 
 # payload initialised with BoM WoW siteid and siteAuthenticationKey
-payload = {'siteid': config['bom_wow_cfg']['SITE_ID'],
-           'siteAuthenticationKey': config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY'],
+payload = {'siteid'                : config['bom_wow_cfg']['SITE_ID'],
+           'siteAuthenticationKey' : config['bom_wow_cfg']['SITE_AUTHENTICATION_KEY'],
+           'softwaretype'          : config['bom_wow_cfg']['SOFTWARE_TYPE'],
            }
 
 data_to_post = {}
