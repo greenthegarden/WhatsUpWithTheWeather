@@ -161,12 +161,12 @@ def process_payload(report) :
 
 	for key, value in report_dict.items() :
 		print("key, value: {0}, {1}".format(key, value))
-#		if key == 'Time_UTC' :
-#			data_to_post['dateutc'] = format_time(value)
+		if key == 'Time_UTC' :
+			data_to_post['dateutc'] = format_time(value)
 		if key == 'Temperature' :
 			# convert from degree Celsius to Farhenhiet
 			data_to_post['tempf'] = '{0:.1f}'.format(degCtoF(value.get('value')))
-			data_to_post['dateutc'] = format_time(get_latest_time(timestr_to_time(value.get('time_utc'))))
+#			data_to_post['dateutc'] = format_time(get_latest_time(timestr_to_time(value.get('time_utc'))))
 		if key == 'Humidity' :
 			data_to_post['humidity'] = value.get('value')
 			data_to_post['dateutc'] = format_time(get_latest_time(timestr_to_time(value.get('time_utc'))))
@@ -241,6 +241,7 @@ def on_connect(client, userdata, flags, rc) :
 def on_message(client, userdata, msg) :
 
 	if msg.topic == config['REPORT_TOPIC'] :
+		print("topic payload: {0}".format(msg.payload))
 		process_payload(msg.payload)
 		if config['bom_wow_cfg']['POST_DATA'] == 'True' :
 			post_payload()
