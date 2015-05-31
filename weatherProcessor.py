@@ -110,7 +110,7 @@ def dewpoint_calc(tempc, humidity) :
 	return dewpoint
 
 def wind_degrees_to_direction(degrees) :
-	if degree == 0 :
+	if degrees == 0 :
 		return "N"
 	if degrees == 22.5 :
 		return "NNE"
