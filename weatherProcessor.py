@@ -183,8 +183,8 @@ def on_message(client, userdata, msg) :
 	msg_arrival_time_utc   = datetime.utcnow()
 
 	global tempc_msg_arrival_time, tempc
-	global tempc_daily_max, tempc_daily_min, rainfall_local_9am
-	global rainmm, dailyrainmm
+	global tempc_daily_min, tempc_daily_max
+	global rainmm, dailyrainmm, rainfall_local_9am
 
 #	print(msg.topic+" "+str(msg.payload))
 
@@ -201,27 +201,27 @@ def on_message(client, userdata, msg) :
 		report['Time_UTC'] = reformat_datetime(msg_arrival_time_utc)
 		if (tempc > tempc_daily_max) :
 			tempc_daily_max = tempc
-			report['Temperature_Max_to9am'] = {'value'     : '{0:.1f}'.format(tempc_daily_max),
+			report['Temperature_Max_to9am'] = {'value'     : '{:.1f}'.format(tempc_daily_max),
 					  														 'time_local': reformat_datetime(msg_arrival_time_local),
 																				 'time_utc'  : reformat_datetime(msg_arrival_time_utc),
 																				 'units'     : 'oC',
 																				 }
-			report['Temp_Max'] = '{0:.1f}'.format(tempc_daily_max)
+			report['Temp_Max'] = '{:.1f}'.format(tempc_daily_max)
 			report['Temp_Max_Time'] = reformat_time(msg_arrival_time_utc)
-			report['Temp_Max_@_Time'] = '{0:.1f}'.format(tempc_daily_max) + " @ " + reformat_time(tempc_msg_arrival_time)
-			client.publish("weather/temperature/daily_max", '{0:.1f}'.format(tempc_daily_max))
+			report['Temp_Max_@_Time'] = '{:.1f}'.format(tempc_daily_max) + " @ " + reformat_time(tempc_msg_arrival_time)
+			client.publish("weather/temperature/daily_max", '{:.1f}'.format(tempc_daily_max))
 			client.publish("weather/temperature/daily_max_time", str(msg_arrival_time_local))
 		if (tempc < tempc_daily_min) :
 			tempc_daily_min = tempc
-			report['Temperature_Min_to9am'] = {'value'     : '{0:.1f}'.format(tempc_daily_max),
+			report['Temperature_Min_to9am'] = {'value'     : '{:.1f}'.format(tempc_daily_min),
 					  														 'time_local': reformat_datetime(msg_arrival_time_local),
 																				 'time_utc'  : reformat_datetime(msg_arrival_time_utc),
 																				 'units'     : 'oC',
 																				 }
-			report['Temp_Min'] = '{0:.1f}'.format(tempc_daily_max)
+			report['Temp_Min'] = '{:.1f}'.format(tempc_daily_min)
 			report['Temp_Min_Time'] = reformat_time(msg_arrival_time_utc)
-			report['Temp_Min_@_Time'] = '{0:.1f}'.format(tempc_daily_min) + " @ " + reformat_time(tempc_msg_arrival_time)
-			client.publish("weather/temperature/daily_min", '{0:.1f}'.format(tempc_daily_max))
+			report['Temp_Min_@_Time'] = '{:.1f}'.format(tempc_daily_min) + " @ " + reformat_time(tempc_msg_arrival_time)
+			client.publish("weather/temperature/daily_min", '{:.1f}'.format(tempc_daily_min))
 			client.publish("weather/temperature/daily_min_time", str(msg_arrival_time_local))
 
 	if msg.topic == config['mqtt_data_topics']['HUMIDITY_TOPIC'] :
