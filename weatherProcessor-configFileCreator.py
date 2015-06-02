@@ -39,15 +39,15 @@ summary_hourly = {
 config['summary_hourly'] = summary_hourly
 
 summary_daily = {
-	'DATA'  : ['Temp_Max_@_Time', 'Temp_Min_@_Time', 'Rain_since_9am'],
+#	'DATA'  : ['Temp_Max_@_Time', 'Temp_Min_@_Time', 'Rain_since_9am'],
+	'DATA'  : ['Temp_Min', 'Temp_Max', 'Rain_since_9am'],
 	'TOPIC' : "weather/summary/daily",
 	}
 config['summary_daily'] = summary_daily
 
 # BoM WoW configuration
 summary_bom_wow = {
-	'DATA'     : ['Time_UTC', 'Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_midnight'],
-#	'DATA'  : ['Time', 'Temperature', 'Humidity', 'Dewpoint', 'Wind_Dir', 'Wind_Spd', 'Rain_last_hour', 'Rain_since_9am'],
+	'DATA'     : ['Time_UTC', 'Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Wind_Spd_Max', 'Rain_last_hour', 'Rain_since_midnight'],
 	'TOPIC'    : "weather/summary/bom_wow",
 	'INTERVAL' : 15,
 	}
@@ -72,6 +72,7 @@ mqtt_data_topics = {
 	'PRESSURE_TOPIC'        : 'weather/measurement/BMP085_pressure',
 	'WIND_DIR_TOPIC'        : 'weather/measurement/wind_dir',
 	'WIND_SPEED_TOPIC'      : 'weather/measurement/wind_spd',
+	'WIND_SPEED_MAX_TOPIC'  : 'weather/measurement/wind_spd_max',
 	'RAIN_TOPIC'            : 'weather/measurement/rain',
 	'BATTERY_VOLTAGE_TOPIC' : 'weather/sunairplus/battery_voltage',
 	'SOLAR_VOLTAGE_TOPIC'   : 'weather/sunairplus/solar_voltage',

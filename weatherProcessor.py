@@ -271,6 +271,14 @@ def on_message(client, userdata, msg) :
 													'units'     : 'knots',
 													}
 
+	if msg.topic == config['mqtt_data_topics']['WIND_SPEED_MAX_TOPIC'] :
+		# in knots
+		report['Wind_Spd_Max'] = {'value'     : msg.payload,
+						  						    'time_local': reformat_datetime(msg_arrival_time_local),
+													    'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+													    'units'     : 'knots',
+													    }
+
 	if msg.topic == config['mqtt_data_topics']['RAIN_TOPIC'] :
 		# in millimetres
 		# only update rain records if rain was recorded
