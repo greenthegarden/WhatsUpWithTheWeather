@@ -184,7 +184,7 @@ def on_message(client, userdata, msg) :
 
 	global tempc_msg_arrival_time, tempc
 	global tempc_daily_min, tempc_daily_max
-	global rainmm, dailyrainmm, rainfall_local_9am
+	global rainmm, rainmmdaily, rainmm9am
 
 #	print(msg.topic+" "+str(msg.payload))
 
