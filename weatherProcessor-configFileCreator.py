@@ -14,6 +14,7 @@ config['log_cfg'] = log_cfg
 # global variable initialisation
 var_init = {
 	'tempc'           : -100,
+	'wind_gust_spd'   : 0,
 	'tempc_daily_max' : -100,
 	'tempc_daily_min' : 100,
 	'rainmmdaily'     : 0,

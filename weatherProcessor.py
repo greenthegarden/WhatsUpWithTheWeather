@@ -67,6 +67,7 @@ sys.stderr = MyLogger(logger, logging.ERROR)
 
 # global variables
 tempc           = float(config['var_init']['tempc'])
+wind_gust_spd   = float(config['var_init']['wind_gust_spd'])
 # to keep track of daily data (midnight to midnight)
 tempc_daily_max = float(config['var_init']['tempc_daily_max'])
 tempc_daily_min = float(config['var_init']['tempc_daily_min'])
@@ -184,6 +185,7 @@ def on_message(client, userdata, msg) :
 
 	global tempc_msg_arrival_time, tempc
 	global tempc_daily_min, tempc_daily_max
+	global wind_gust_spd
 	global rainmm, rainmmdaily, rainmm9am
 
 #	print(msg.topic+" "+str(msg.payload))
@@ -199,7 +201,7 @@ def on_message(client, userdata, msg) :
 														 }
 		report['Time'] = reformat_datetime(tempc_msg_arrival_time)
 		report['Time_UTC'] = reformat_datetime(msg_arrival_time_utc)
-		if (tempc > tempc_daily_max) :
+		if tempc > tempc_daily_max :
 			tempc_daily_max = tempc
 			report['Temperature_Max_to9am'] = {'value'     : '{:.1f}'.format(tempc_daily_max),
 					  														 'time_local': reformat_datetime(msg_arrival_time_local),
@@ -211,7 +213,7 @@ def on_message(client, userdata, msg) :
 			report['Temp_Max_@_Time'] = '{:.1f}'.format(tempc_daily_max) + " @ " + reformat_time(tempc_msg_arrival_time)
 			client.publish("weather/temperature/daily_max", '{:.1f}'.format(tempc_daily_max))
 			client.publish("weather/temperature/daily_max_time", str(msg_arrival_time_local))
-		if (tempc < tempc_daily_min) :
+		if tempc < tempc_daily_min :
 			tempc_daily_min = tempc
 			report['Temperature_Min_to9am'] = {'value'     : '{:.1f}'.format(tempc_daily_min),
 					  														 'time_local': reformat_datetime(msg_arrival_time_local),
@@ -273,11 +275,16 @@ def on_message(client, userdata, msg) :
 
 	if msg.topic == config['mqtt_data_topics']['WIND_SPEED_MAX_TOPIC'] :
 		# in knots
-		report['Wind_Spd_Max'] = {'value'     : msg.payload,
-						  						    'time_local': reformat_datetime(msg_arrival_time_local),
-													    'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													    'units'     : 'knots',
-													    }
+		# capture max wind gust per post to BoM WoW
+		# value is reset once published
+		# only publish if greater than 0
+		if float(msg.payload) > wind_gust_spd :
+			wind_gust_spd = float(msg.payload)
+			report['Wind_Spd_Max'] = {'value'     : wind_gust_spd,
+																'time_local': reformat_datetime(msg_arrival_time_local),
+																'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+																'units'     : 'knots',
+																}
 
 	if msg.topic == config['mqtt_data_topics']['RAIN_TOPIC'] :
 		# in millimetres
@@ -395,6 +402,7 @@ def publish_daily_summary() :
 		publish_daily_last_sent = msg_arrival_time_local
 
 def publish_bom_wow_summary() :
+	global wind_gust_spd
 	global publish_bom_wow_last_sent
 	if msg_arrival_time_local > publish_bom_wow_last_sent :
 		summary = {x: report[x] for x in config['summary_bom_wow']['DATA'] if x in report}
@@ -402,6 +410,8 @@ def publish_bom_wow_summary() :
 			print("Topic: {0}".format(str(config['summary_bom_wow']['TOPIC'])))
 			print("Summary: {0}".format(str(summary)))
 			client.publish(config['summary_bom_wow']['TOPIC'], str(summary))
+			# reset max wind gust
+			wind_gust_spd = 0
 		publish_bom_wow_last_sent = msg_arrival_time_local
 
 def on_hour() :
