@@ -47,7 +47,7 @@ config['summary_daily'] = summary_daily
 
 # BoM WoW configuration
 summary_bom_wow = {
-	'DATA'     : ['Time_UTC', 'Temperature', 'Humidity', 'Wind_Dir', 'Wind_Spd', 'Wind_Spd_Max', 'Rain_last_hour', 'Rain_since_midnight'],
+	'DATA'     : ['Time_UTC', 'Temperature', 'Humidity', 'Pressure', 'Wind_Dir', 'Wind_Spd', 'Wind_Spd_Max', 'Rain_last_hour', 'Rain_since_midnight'],
 	'TOPIC'    : "weather/summary/bom_wow",
 	'INTERVAL' : 15,
 	}
