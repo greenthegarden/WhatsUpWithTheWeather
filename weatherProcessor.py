@@ -289,30 +289,30 @@ def on_message(client, userdata, msg) :
 	if msg.topic == config['mqtt_data_topics']['RAIN_TOPIC'] :
 		# in millimetres
 		# only update rain records if rain was recorded
-		# rainmm value is reset to 0 on hour
-		if float(msg.payload) > 0 :
+		if float(msg.payload) > 0.0 :
+			# rainmm value is reset to 0 on hour
 			rainmm += float(msg.payload)
-			report['Rain_last_hour'] = {'value'     : '{0:.1f}'.format(rainmm),
-						  						        'time_local': reformat_datetime(msg_arrival_time_local),
-													        'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													        'units'     : 'mm',
-													        }
 			# rainmm9am is the rain since 9am - value is reset to 0 at 9am
 			rainmm9am += float(msg.payload)
-			report['Rain_since_9am'] = {'value'     : '{0:.1f}'.format(rainmm9am),
-						  						        'time_local': reformat_datetime(msg_arrival_time_local),
-													        'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													        'units'     : 'mm',
-													        }
-			client.publish("weather/rainfall/since9am", '{0:.1f}'.format(rainmmdaily))
 			# rainmmdaily is the rain since midnight - value is reset to 0 at midnight
 			rainmmdaily += float(msg.payload)
-			report['Rain_since_midnight'] = {'value'     : '{0:.1f}'.format(rainmmdaily),
-						  						             'time_local': reformat_datetime(msg_arrival_time_local),
-													             'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													             'units'     : 'mm',
-													             }
-			client.publish("weather/rainfall/sincemidnight", '{0:.1f}'.format(rainmmdaily))
+		report['Rain_last_hour'] = {'value'     : '{0:.1f}'.format(rainmm),
+																'time_local': reformat_datetime(msg_arrival_time_local),
+																'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+																'units'     : 'mm',
+																}
+		report['Rain_since_9am'] = {'value'     : '{0:.1f}'.format(rainmm9am),
+																'time_local': reformat_datetime(msg_arrival_time_local),
+																'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+																'units'     : 'mm',
+																}
+		client.publish("weather/rainfall/since9am", '{0:.1f}'.format(rainmmdaily))
+		report['Rain_since_midnight'] = {'value'     : '{0:.1f}'.format(rainmmdaily),
+																		 'time_local': reformat_datetime(msg_arrival_time_local),
+																		 'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+																		 'units'     : 'mm',
+																		 }
+		client.publish("weather/rainfall/sincemidnight", '{0:.1f}'.format(rainmmdaily))
 
 	if msg.topic == config['mqtt_data_topics']['BATTERY_VOLTAGE_TOPIC'] :
 		report['Battery_Voltage'] = {'value'     : msg.payload,
