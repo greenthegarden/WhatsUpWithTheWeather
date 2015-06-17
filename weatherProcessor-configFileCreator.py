@@ -54,6 +54,14 @@ summary_bom_wow = {
 	}
 config['summary_bom_wow'] = summary_bom_wow
 
+# Station settings
+station_location = {
+	'ELEVATION' : 35,
+	'LATITUDE'  : -34.887558,
+	'LONGITUDE' : 138.63018,
+	}
+config['station_location'] = station_location
+
 # mqtt configuration
 mqtt_configuration = {
 	'MQTT_BROKER_IP'           : "192.168.1.55",
@@ -71,6 +79,7 @@ mqtt_data_topics = {
 	'TEMPERATURE_TOPIC'     : 'weather/measurement/SHT15_temp',
 	'HUMIDITY_TOPIC'        : 'weather/measurement/SHT15_humidity',
 	'PRESSURE_TOPIC'        : 'weather/measurement/BMP085_pressure',
+	'BMP085_TEMP_TOPIC'     : 'weather/measurement/BMP085_temp',
 	'WIND_DIR_TOPIC'        : 'weather/measurement/wind_dir',
 	'WIND_SPEED_TOPIC'      : 'weather/measurement/wind_spd',
 	'WIND_SPEED_MAX_TOPIC'  : 'weather/measurement/wind_spd_max',
