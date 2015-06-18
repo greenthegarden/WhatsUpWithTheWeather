@@ -114,7 +114,7 @@ def dewpoint_calc(tempc, humidity) :
 # source: http://www.sandhurstweather.org.uk/barometric.pdf
 def pressure_station_to_msl(pressure,
                             temperature,
-                            elevation = float(config['station_location']['Elevation'])
+                            elevation = float(config['station_location']['ELEVATION'])
                             ) :
 	from math import exp
 	factor = exp(-elevation / ((temperature+273.15) * 29.263))
@@ -213,11 +213,11 @@ def on_message(client, userdata, msg) :
 		report['Time_UTC'] = reformat_datetime(msg_arrival_time_utc)
 		if tempc > tempc_daily_max :
 			tempc_daily_max = tempc
-			report['Temperature_Max_to9am'] = {'value'     : '{:.1f}'.format(tempc_daily_max),
-					  														 'time_local': reformat_datetime(msg_arrival_time_local),
-																				 'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-																				 'units'     : 'oC',
-																				 }
+			report['Temperature_Max_to9am'] = {'value'  : '{:.1f}'.format(tempc_daily_max),
+					  		'time_local': reformat_datetime(msg_arrival_time_local),
+							'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+							'units'     : 'oC',
+							}
 			report['Temp_Max'] = '{:.1f}'.format(tempc_daily_max)
 			report['Temp_Max_Time'] = reformat_time(msg_arrival_time_utc)
 			report['Temp_Max_@_Time'] = '{:.1f}'.format(tempc_daily_max) + " @ " + reformat_time(tempc_msg_arrival_time)
@@ -226,10 +226,10 @@ def on_message(client, userdata, msg) :
 		if tempc < tempc_daily_min :
 			tempc_daily_min = tempc
 			report['Temperature_Min_to9am'] = {'value'     : '{:.1f}'.format(tempc_daily_min),
-					  														 'time_local': reformat_datetime(msg_arrival_time_local),
-																				 'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-																				 'units'     : 'oC',
-																				 }
+					  		'time_local': reformat_datetime(msg_arrival_time_local),
+							'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+							'units'     : 'oC',
+							}
 			report['Temp_Min'] = '{:.1f}'.format(tempc_daily_min)
 			report['Temp_Min_Time'] = reformat_time(msg_arrival_time_utc)
 			report['Temp_Min_@_Time'] = '{:.1f}'.format(tempc_daily_min) + " @ " + reformat_time(tempc_msg_arrival_time)
@@ -239,18 +239,18 @@ def on_message(client, userdata, msg) :
 	if msg.topic == config['mqtt_data_topics']['HUMIDITY_TOPIC'] :
 		# as a percentage
 		report['Humidity'] = {'value'     : msg.payload,	# add as string rather than float
-					  							'time_local': reformat_datetime(msg_arrival_time_local),
-													'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													'units'     : '%',
-													}
+					'time_local': reformat_datetime(msg_arrival_time_local),
+					'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+					'units'     : '%',
+					}
 		# check temperature is in report
 		if (msg_arrival_time_local - datetime.strptime(report['Temperature'].get('time_local'), "%a %b %d %H:%M:%S %Y")) < timedelta(seconds=2) :
 			dewpoint = dewpoint_calc(float(report['Temperature'].get('value',tempc)), float(msg.payload))
 			report['Dewpoint'] = {'value'     : '{0:.1f}'.format(dewpoint),
-						  							'time_local': reformat_datetime(msg_arrival_time_local),
-														'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-														'units'     : 'oC',
-														}
+						'time_local': reformat_datetime(msg_arrival_time_local),
+						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+						'units'     : 'oC',
+						}
 			client.publish("weather/dewpoint/SHT15_dewpoint", '{0:.1f}'.format(dewpoint))
 
 	# weather station will not report measurements from pressure sensor
@@ -259,10 +259,10 @@ def on_message(client, userdata, msg) :
 	if msg.topic == config['mqtt_data_topics']['PRESSURE_TOPIC'] :
 		# in mbar
 		report['Station_Pressure'] = {'value'     : msg.payload,
-					      'time_local': reformat_datetime(msg_arrival_time_local),
-					'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													'units'     : 'mbar',
-													}
+						'time_local': reformat_datetime(msg_arrival_time_local),
+						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+						'units'     : 'mbar',
+						}
 
 	if msg.topic == config['mqtt_data_topics']['BMP085_TEMP_TOPIC'] :
 		# in degrees Celcius
@@ -281,19 +281,19 @@ def on_message(client, userdata, msg) :
 	if msg.topic == config['mqtt_data_topics']['WIND_DIR_TOPIC'] :
 		# in degrees
 		report['Wind_Dir'] = {'value'     : msg.payload,
-						  						'time_local': reformat_datetime(msg_arrival_time_local),
-													'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													'units'     : 'deg',
-													'direction' : wind_degrees_to_direction(msg.payload),
-													}
+					'time_local': reformat_datetime(msg_arrival_time_local),
+					'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+					'units'     : 'deg',
+					'direction' : wind_degrees_to_direction(msg.payload),
+					}
 
 	if msg.topic == config['mqtt_data_topics']['WIND_SPEED_TOPIC'] :
 		# in knots
 		report['Wind_Spd'] = {'value'     : msg.payload,
-						  						'time_local': reformat_datetime(msg_arrival_time_local),
-													'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													'units'     : 'knots',
-													}
+					'time_local': reformat_datetime(msg_arrival_time_local),
+					'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+					'units'     : 'knots',
+					}
 
 	if msg.topic == config['mqtt_data_topics']['WIND_SPEED_MAX_TOPIC'] :
 		# in knots
@@ -303,10 +303,10 @@ def on_message(client, userdata, msg) :
 		if float(msg.payload) > wind_gust_spd :
 			wind_gust_spd = float(msg.payload)
 			report['Wind_Spd_Max'] = {'value'     : wind_gust_spd,
-																'time_local': reformat_datetime(msg_arrival_time_local),
-																'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-																'units'     : 'knots',
-																}
+						'time_local': reformat_datetime(msg_arrival_time_local),
+						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+						'units'     : 'knots',
+						}
 
 	if msg.topic == config['mqtt_data_topics']['RAIN_TOPIC'] :
 		# in millimetres
@@ -319,43 +319,43 @@ def on_message(client, userdata, msg) :
 			# rainmmdaily is the rain since midnight - value is reset to 0 at midnight
 			rainmmdaily += float(msg.payload)
 		report['Rain_last_hour'] = {'value'     : '{0:.1f}'.format(rainmm),
-																'time_local': reformat_datetime(msg_arrival_time_local),
-																'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-																'units'     : 'mm',
-																}
+						'time_local': reformat_datetime(msg_arrival_time_local),
+						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+						'units'     : 'mm',
+						}
 		report['Rain_since_9am'] = {'value'     : '{0:.1f}'.format(rainmm9am),
-																'time_local': reformat_datetime(msg_arrival_time_local),
-																'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-																'units'     : 'mm',
-																}
+						'time_local': reformat_datetime(msg_arrival_time_local),
+						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+						'units'     : 'mm',
+						}
 		client.publish("weather/rainfall/since9am", '{0:.1f}'.format(rainmmdaily))
 		report['Rain_since_midnight'] = {'value'     : '{0:.1f}'.format(rainmmdaily),
-																		 'time_local': reformat_datetime(msg_arrival_time_local),
-																		 'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-																		 'units'     : 'mm',
-																		 }
+						'time_local': reformat_datetime(msg_arrival_time_local),
+						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+						'units'     : 'mm',
+						}
 		client.publish("weather/rainfall/sincemidnight", '{0:.1f}'.format(rainmmdaily))
 
 	if msg.topic == config['mqtt_data_topics']['BATTERY_VOLTAGE_TOPIC'] :
 		report['Battery_Voltage'] = {'value'     : msg.payload,
-						  						       'time_local': reformat_datetime(msg_arrival_time_local),
-													       'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													       'units'     : 'volts',
-													        }
+						'time_local': reformat_datetime(msg_arrival_time_local),
+						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+						'units'     : 'volts',
+						}
 
 	if msg.topic == config['mqtt_data_topics']['SOLAR_VOLTAGE_TOPIC'] :
 		report['Solar_Voltage'] = {'value'     : msg.payload,
-						  						     'time_local': reformat_datetime(msg_arrival_time_local),
-													     'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													     'units'     : 'volts',
-													      }
+						'time_local': reformat_datetime(msg_arrival_time_local),
+						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+						'units'     : 'volts',
+						}
 
 	if msg.topic == config['mqtt_data_topics']['OUTPUT_VOLTAGE_TOPIC'] :
 		report['Output_Voltage'] = {'value'     : msg.payload,
-						  						      'time_local': reformat_datetime(msg_arrival_time_local),
-													      'time_utc'  : reformat_datetime(msg_arrival_time_utc),
-													      'units'     : 'volts',
-													      }
+						'time_local': reformat_datetime(msg_arrival_time_local),
+						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+						'units'     : 'volts',
+						}
 
 # Definition of MQTT client and connection to MQTT Broker
 
