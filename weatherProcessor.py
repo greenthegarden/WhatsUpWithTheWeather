@@ -118,8 +118,9 @@ def pressure_station_to_msl(pressure,
                             ) :
 	from math import exp
 	factor = exp(-elevation / ((temperature+273.15) * 29.263))
-#	print("pressure_station_to_msl->factor: {0}".format(factor))
-	return(pressure / factor)
+	mslp = pressure / factor
+	print("pressure_station_to_msl->factor: {0}, mslp: {1}".format(factor, mslp))
+	return mslp
 
 def wind_degrees_to_direction(degrees) :
 	degrees = float(degrees)
@@ -262,7 +263,7 @@ def on_message(client, userdata, msg) :
 	# if error code generated when taking reading
 	if msg.topic == config['mqtt_data_topics']['BMP085_TEMP_TOPIC'] :
 		# in degrees Celcius
-		report['Temp_BMP085'] = {'value'     : '{0:.1f}'.format(msg.payload),
+		report['Temp_BMP085'] = {'value'    : msg.payload,
 					'time_local': reformat_datetime(msg_arrival_time_local),
 					'time_utc'  : reformat_datetime(msg_arrival_time_utc),
 					'units'     : 'oC',
@@ -270,7 +271,7 @@ def on_message(client, userdata, msg) :
 
 	if msg.topic == config['mqtt_data_topics']['PRESSURE_TOPIC'] :
 		# in mbar
-		report['Station_Pressure'] = {'value'     : msg.payload,
+		report['Station_Pressure'] = {'value'       : msg.payload,
 						'time_local': reformat_datetime(msg_arrival_time_local),
 						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
 						'units'     : 'mbar',
@@ -316,6 +317,7 @@ def on_message(client, userdata, msg) :
 						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
 						'units'     : 'knots',
 						}
+		print("wind_gust_spd is {0} knots".format(wind_gust_spd))
 
 	if msg.topic == config['mqtt_data_topics']['RAIN_TOPIC'] :
 		# in millimetres
