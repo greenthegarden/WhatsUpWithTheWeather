@@ -118,6 +118,7 @@ def pressure_station_to_msl(pressure,
                             ) :
 	from math import exp
 	factor = exp(-elevation / ((temperature+273.15) * 29.263))
+#	print("pressure_station_to_msl->factor: {0}".format(factor))
 	return(pressure / factor)
 
 def wind_degrees_to_direction(degrees) :
@@ -211,6 +212,7 @@ def on_message(client, userdata, msg) :
 					 }
 		report['Time'] = reformat_datetime(tempc_msg_arrival_time)
 		report['Time_UTC'] = reformat_datetime(msg_arrival_time_utc)
+
 		if tempc > tempc_daily_max :
 			tempc_daily_max = tempc
 			report['Temperature_Max_to9am'] = {'value'  : '{:.1f}'.format(tempc_daily_max),
@@ -235,6 +237,8 @@ def on_message(client, userdata, msg) :
 			report['Temp_Min_@_Time'] = '{:.1f}'.format(tempc_daily_min) + " @ " + reformat_time(tempc_msg_arrival_time)
 			client.publish("weather/temperature/daily_min", '{:.1f}'.format(tempc_daily_min))
 			client.publish("weather/temperature/daily_min_time", str(msg_arrival_time_local))
+		print("tempc_daily_min is {0} oC".format(tempc_daily_min))
+		print("tempc_daily_max is {0} oC".format(tempc_daily_max))
 
 	if msg.topic == config['mqtt_data_topics']['HUMIDITY_TOPIC'] :
 		# as a percentage
@@ -273,7 +277,7 @@ def on_message(client, userdata, msg) :
 						}
 		# check temperature reading from pressure sensor is in report
 		if (msg_arrival_time_local - datetime.strptime(report['Temp_BMP085'].get('time_local'), "%a %b %d %H:%M:%S %Y")) < timedelta(seconds=2) :
-			MSLP = pressure_station_to_msl(float(float(msg.payload), report['Temp_BMP085'].get('value')))
+			MSLP = pressure_station_to_msl(float(msg.payload), float(report['Temp_BMP085'].get('value')))
 			report['Pressure'] = {'value'     : '{0:.1f}'.format(MSLP),
 					      'time_local': reformat_datetime(msg_arrival_time_local),
 					      'time_utc'  : reformat_datetime(msg_arrival_time_utc),
