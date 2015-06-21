@@ -56,7 +56,7 @@ config['summary_bom_wow'] = summary_bom_wow
 
 # Station settings
 station_location = {
-	'ELEVATION' : 35,
+	'ELEVATION' : 45,
 	'LATITUDE'  : -34.887558,
 	'LONGITUDE' : 138.63018,
 	}

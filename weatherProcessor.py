@@ -256,6 +256,14 @@ def on_message(client, userdata, msg) :
 	# weather station will not report measurements from pressure sensor
 	# if error code generated when sensor is initialised, or
 	# if error code generated when taking reading
+	if msg.topic == config['mqtt_data_topics']['BMP085_TEMP_TOPIC'] :
+		# in degrees Celcius
+		report['Temp_BMP085'] = {'value'     : '{0:.1f}'.format(msg.payload),
+					'time_local': reformat_datetime(msg_arrival_time_local),
+					'time_utc'  : reformat_datetime(msg_arrival_time_utc),
+					'units'     : 'oC',
+					}
+
 	if msg.topic == config['mqtt_data_topics']['PRESSURE_TOPIC'] :
 		# in mbar
 		report['Station_Pressure'] = {'value'     : msg.payload,
@@ -263,12 +271,9 @@ def on_message(client, userdata, msg) :
 						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
 						'units'     : 'mbar',
 						}
-
-	if msg.topic == config['mqtt_data_topics']['BMP085_TEMP_TOPIC'] :
-		# in degrees Celcius
-		# check pressure is in report
-		if (msg_arrival_time_local - datetime.strptime(report['Station_Pressure'].get('time_local'), "%a %b %d %H:%M:%S %Y")) < timedelta(seconds=2) :
-			MSLP = pressure_station_to_msl(float(report['Station_Pressure'].get('value')), float(msg.payload))
+		# check temperature reading from pressure sensor is in report
+		if (msg_arrival_time_local - datetime.strptime(report['Temp_BMP085'].get('time_local'), "%a %b %d %H:%M:%S %Y")) < timedelta(seconds=2) :
+			MSLP = pressure_station_to_msl(float(float(msg.payload), report['Temp_BMP085'].get('value')))
 			report['Pressure'] = {'value'     : '{0:.1f}'.format(MSLP),
 					      'time_local': reformat_datetime(msg_arrival_time_local),
 					      'time_utc'  : reformat_datetime(msg_arrival_time_utc),
