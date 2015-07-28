@@ -334,12 +334,13 @@ def on_message(client, userdata, msg) :
 						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
 						'units'     : 'mm',
 						}
+		client.publish("weather/rainfall/rainmm", '{0:.1f}'.format(rainmm))
 		report['Rain_since_9am'] = {'value'     : '{0:.1f}'.format(rainmm9am),
 						'time_local': reformat_datetime(msg_arrival_time_local),
 						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
 						'units'     : 'mm',
 						}
-		client.publish("weather/rainfall/since9am", '{0:.1f}'.format(rainmmdaily))
+		client.publish("weather/rainfall/since9am", '{0:.1f}'.format(rainmm9am))
 		report['Rain_since_midnight'] = {'value'     : '{0:.1f}'.format(rainmmdaily),
 						'time_local': reformat_datetime(msg_arrival_time_local),
 						'time_utc'  : reformat_datetime(msg_arrival_time_utc),
